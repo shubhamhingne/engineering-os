@@ -25,3 +25,7 @@ build/
 *.log
 coverage/
 .pytest_cache/
+
+# local databases
+*.db
+*.sqlite3

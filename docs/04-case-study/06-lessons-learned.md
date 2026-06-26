@@ -41,6 +41,23 @@ which is itself one of the lessons. These are reflections, not achievements.
   each was wrong for the MVP. Reaching for sophistication before the simple version is proven is a
   common senior-engineer trap I had to actively resist.
 
+## On implementation (Day 9 — first vertical slice)
+
+- **The architecture survived contact with code.** Building one workflow end-to-end (create →
+  generate Vision → edit → save → reopen) against the documented hexagon worked without rework:
+  the `AIProviderPort` + fake adapter made the generation logic testable with zero network, and
+  the module/adapter split held. The design paid for itself on day one of coding.
+- **A fake adapter is the highest-leverage test tool.** Putting the AI behind a port meant the
+  whole workflow is deterministically testable (11 passing tests) without a provider or a key.
+  This is the concrete payoff of "providers are replaceable" — it's a *testability* win, not just
+  a vendor-flexibility one.
+- **Environment ≠ target.** The documented stack targets Python 3.12, but the only local
+  interpreter was 3.9. Rather than fake the result, I made the type hints version-agnostic so the
+  tests actually run and prove the slice — honesty over a green screenshot I couldn't stand behind.
+- **A vertical slice exposes the real seams.** Persistence, validation, error handling, and
+  observability all showed up in one small workflow — exactly as intended. The slice is small but
+  it touched every layer, which is the point.
+
 ## What I would do differently already
 
 - I would have written this case-study narrative *in parallel* with the work from day one, not

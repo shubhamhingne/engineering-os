@@ -9,10 +9,15 @@ deliberately, so the portfolio value compounds with the product.
 
 - Auth (email + GitHub OAuth)
 - Project workspace (create, list, lifecycle stage)
-- AI generation: Vision → PRD → Architecture + ADR → README (editable, versioned)
+- AI generation order (revised): **Vision → PRD → Repository Bootstrap → README → ADR**
+  (editable, versioned). Bootstrapping the repo *before* the README/ADR gives the user something
+  tangible early, and lets ADRs be generated with real repository context — making them more
+  grounded.
 - Multi-model support (provider abstraction, model selector)
 - GitHub scaffolding (create repo + push standards + docs)
 - PostgreSQL persistence; structured logging
+- **Shipped (Day 9):** Vision slice — create project → generate Vision → edit → save → reopen,
+  with tests and observability.
 
 **Stack showcased:** Next.js (web) · FastAPI (Python) · PostgreSQL · Auth · LLM integration ·
 GitHub API · Docker · CI/CD.
