@@ -9,13 +9,14 @@ export const metadata = {
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
-      <body>
-        <header className="flex h-12 items-center border-b border-border px-6">
-          <span className="font-semibold">Engineering OS</span>
-          <span className="ml-3 text-sm text-text-secondary">Idea → repository</span>
-        </header>
-        <main className="mx-auto max-w-3xl p-6">{children}</main>
-      </body>
+      <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+          rel="stylesheet"
+        />
+      </head>
+      <body className="bg-base font-sans text-text antialiased">{children}</body>
     </html>
   );
 }

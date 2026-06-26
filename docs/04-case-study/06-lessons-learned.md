@@ -41,6 +41,23 @@ which is itself one of the lessons. These are reflections, not achievements.
   each was wrong for the MVP. Reaching for sophistication before the simple version is proven is a
   common senior-engineer trap I had to actively resist.
 
+## On the workspace architecture (Day 11 — the signature screen)
+
+- **Why one shell, many capabilities.** Instead of a page per artifact, the workspace is a single
+  `WorkspaceShell` composing four zones, and every artifact (Vision, PRD, README, ADR) is the same
+  type-agnostic components fed different data. The cost of the *next* artifact's UI is now ~zero —
+  the mirror of the domain decision in [ADR-0004](../02-architecture/adr/0004-artifact-abstraction.md).
+- **The EDR caught the real risk before code.** [EDR-001](../08-decisions/edr-001-workspace.md)
+  forced the question "will this scale to 20 artifacts?" *before* implementation. The answer
+  shaped the architecture (data-driven tree, type-agnostic editor, one I/O hook) — far cheaper than
+  discovering it after building 4 bespoke pages.
+- **Designing in code first removed guesswork.** The verified HTML prototype was the spec; the
+  React implementation transcribed it. No "design while coding," no rework loop — the most
+  expensive part of UI work was already settled.
+- **Separating I/O from presentation made everything testable.** `useWorkspace` is the only place
+  that touches the network; every other component is pure (props → UI). That's the seam where tests
+  (and later React Query) slot in without touching a single visual component.
+
 ## On generalizing the domain (Day 10 — slice #2)
 
 - **Why we generalized `VisionArtifact` → `Artifact`.** Slice #1 modelled *Vision*; the product

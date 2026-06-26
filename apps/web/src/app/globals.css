@@ -3,4 +3,13 @@
 @tailwind utilities;
 
 :root { color-scheme: dark; }
-body { @apply bg-base text-text; font-family: Inter, system-ui, sans-serif; }
+body { font-family: Inter, system-ui, sans-serif; }
+
+/* Reduced motion (Pro Max rule 9 / a11y) */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
