@@ -1,0 +1,27 @@
+name: Label sync
+
+# Labels are not inherited across repos. This syncs .github/labels.yml to the repository
+# whenever the label set changes, and on manual dispatch.
+
+on:
+  push:
+    branches: [main]
+    paths: [".github/labels.yml"]
+  workflow_dispatch:
+
+permissions:
+  issues: write
+  contents: read
+
+jobs:
+  labeler:
+    name: Sync labels
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Apply labels
+        uses: crazy-max/ghaction-github-labeler@v5
+        with:
+          yaml-file: .github/labels.yml
+          skip-delete: false
+          dry-run: false

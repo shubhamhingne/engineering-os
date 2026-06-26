@@ -1,0 +1,10 @@
+{
+  "name": "engineering-os",
+  "private": true,
+  "description": "AI-powered workspace that turns an idea into a production-grade repository.",
+  "workspaces": ["apps/*", "packages/*"],
+  "scripts": {
+    "bootstrap": "bash tooling/scripts/bootstrap.sh",
+    "check:docs": "python3 tooling/scripts/check-doc-links.py"
+  }
+}

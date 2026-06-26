@@ -1,0 +1,24 @@
+# Configuration for GitHub's automatically generated release notes.
+# Copy into each repository's .github/ folder.
+changelog:
+  exclude:
+    labels:
+      - "ignore-for-release"
+    authors:
+      - dependabot
+      - dependabot[bot]
+  categories:
+    - title: 🚀 Features
+      labels: ["type: feature"]
+    - title: 🐛 Fixes
+      labels: ["type: bug"]
+    - title: ⚡ Performance
+      labels: ["type: perf"]
+    - title: 📝 Documentation
+      labels: ["type: docs"]
+    - title: 🧰 Maintenance
+      labels: ["type: task", "type: refactor"]
+    - title: 📦 Dependencies
+      labels: ["dependencies"]
+    - title: Other changes
+      labels: ["*"]
