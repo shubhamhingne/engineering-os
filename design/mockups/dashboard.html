@@ -1,0 +1,41 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Engineering OS — Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0F172A;--raised:#1E293B;--border:#1E293B;--border-2:#334155;--text:#F8FAFC;--text-2:#94A3B8;--muted:#64748B;--action:#2563EB;--accent:#06B6D4;--green:#22C55E;--mono:'JetBrains Mono',monospace}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Inter,system-ui,sans-serif;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased;height:100vh;font-size:14px}
+.nav{height:48px;display:flex;align-items:center;gap:14px;padding:0 16px;border-bottom:1px solid var(--border)}
+.logo{width:24px;height:24px;border-radius:6px;border:1px solid var(--border-2);display:grid;place-items:center}.logo svg{width:16px;height:16px;fill:#fff}
+.crumb{font-size:13px;color:var(--text-2)}.crumb b{color:#fff}
+.spacer{flex:1}
+.search{display:flex;align-items:center;gap:8px;background:var(--raised);border:1px solid var(--border-2);border-radius:8px;padding:5px 10px;color:var(--muted);font-size:13px;width:280px}
+.kbd{font-family:var(--mono);font-size:11px;border:1px solid var(--border-2);border-radius:4px;padding:1px 5px;color:var(--text-2);margin-left:auto}
+.avatar{width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#2563EB,#06B6D4)}
+.wrap{max-width:980px;margin:0 auto;padding:34px 24px}
+.head{display:flex;align-items:center;margin-bottom:20px}
+.h1{font-size:20px;font-weight:600}.sub{color:var(--muted);font-size:13px;margin-top:2px}
+.btn{margin-left:auto;background:var(--action);color:#fff;border:0;border-radius:8px;padding:9px 14px;font:inherit;font-size:13px;font-weight:500}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.card{background:var(--raised);border:1px solid var(--border-2);border-radius:12px;padding:16px;min-height:128px;display:flex;flex-direction:column}
+.card:hover{border-color:#3f516b}
+.ct{font-weight:600;font-size:15px}
+.cidea{color:var(--text-2);font-size:12.5px;margin-top:5px;line-height:1.5;flex:1}
+.chips{display:flex;gap:6px;margin-top:12px}
+.chip{font-family:var(--mono);font-size:10.5px;border-radius:999px;padding:2px 8px;border:1px solid var(--border-2);color:var(--text-2)}
+.chip.ai{color:var(--accent);border-color:rgba(6,182,212,.4)}
+.cfoot{display:flex;align-items:center;gap:8px;margin-top:12px;font-size:11px;color:var(--muted);font-family:var(--mono)}
+.prog{height:4px;border-radius:2px;background:#0B1220;flex:1;overflow:hidden}.prog i{display:block;height:100%;background:linear-gradient(90deg,var(--action),var(--accent))}
+.new{display:grid;place-items:center;border:1px dashed var(--border-2);border-radius:12px;color:var(--muted);font-size:13px;min-height:128px}
+</style></head><body>
+<div class="nav"><div class="logo"><svg viewBox="0 0 100 100"><rect x="8" y="8" width="16" height="64"/><rect x="76" y="28" width="16" height="64"/><rect x="8" y="8" width="68" height="16"/><rect x="24" y="76" width="68" height="16"/><rect x="24" y="42" width="52" height="16"/><rect x="60" y="24" width="16" height="18"/><rect x="24" y="58" width="16" height="18"/></svg></div>
+<div class="crumb"><b>Engineering OS</b></div><div class="spacer"></div>
+<div class="search">⌕ Search or run a command <span class="kbd">⌘K</span></div><div class="avatar"></div></div>
+<div class="wrap">
+  <div class="head"><div><div class="h1">Projects</div><div class="sub">3 projects · idea to repository</div></div><button class="btn">＋ New project</button></div>
+  <div class="grid">
+    <div class="card"><div class="ct">engineering-os</div><div class="cidea">An AI workspace that turns an idea into a production-grade repository.</div><div class="chips"><span class="chip ai">Vision</span><span class="chip">PRD</span></div><div class="cfoot"><div class="prog"><i style="width:55%"></i></div>5/9</div></div>
+    <div class="card"><div class="ct">salon-erp</div><div class="cidea">Multi-location salon operations platform with billing and inventory.</div><div class="chips"><span class="chip ai">Vision</span></div><div class="cfoot"><div class="prog"><i style="width:22%"></i></div>2/9</div></div>
+    <div class="card"><div class="ct">mobile-lab</div><div class="cidea">A showcase of modern Android &amp; Flutter architecture patterns.</div><div class="chips"><span class="chip">empty</span></div><div class="cfoot"><div class="prog"><i style="width:10%"></i></div>1/9</div></div>
+    <div class="new">＋ Start from an idea</div>
+  </div>
+</div></body></html>

@@ -20,6 +20,21 @@ integration, e2e) and a live run.
    "provider":"fake","model":"fake-1","tokens_in":11,"tokens_out":74,"latency_ms":0}
   ```
 
+## Day 10.5 — Design Sprint (the signature workspace)
+
+High-fidelity mockups of the Engineering Workspace, designed before implementation
+([spec](../03-design-system/18-workspace-design-spec.md), [Pro Max standard](../03-design-system/17-ui-ux-pro-max.md)).
+Self-contained HTML/CSS in [`design/mockups/`](../../design/mockups/) — they double as the
+implementation spec.
+
+- ![Artifact Workspace](screenshots/artifact-workspace.png)
+- ![Dashboard](screenshots/dashboard.png)
+- ![Command Palette](screenshots/command-palette.png)
+
+The four-zone workspace (tree · editor · AI context · timeline) with live token meter, AI
+provenance, generation timeline, and version history — the screen meant to make a reviewer stop
+scrolling.
+
 ## Day 10 — Vertical Slice #2 (Artifact abstraction + PRD)
 
 `VisionArtifact` was generalized to a typed `Artifact` with immutable version history
