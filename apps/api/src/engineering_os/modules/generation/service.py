@@ -2,6 +2,7 @@
 run through the AI port. Emits artifact-centric observability (Principle 4)."""
 import logging
 import time
+from collections.abc import Iterator
 
 from ...ports.ai_provider import AIProvider, GenerationResult, Prompt
 
@@ -24,6 +25,7 @@ _SYSTEM = {
 class GenerationService:
     def __init__(self, provider: AIProvider) -> None:
         self._provider = provider
+        self.last_model: str = getattr(provider, "model", provider.name)
 
     def _build_prompt(self, artifact_type: str, context: dict[str, str]) -> Prompt:
         if artifact_type == "vision":
@@ -57,3 +59,10 @@ class GenerationService:
             },
         )
         return result
+
+    def stream(self, artifact_type: str, context: dict[str, str]) -> Iterator[str]:
+        """Yield content chunks for a generation. The caller accumulates and persists."""
+        prompt = self._build_prompt(artifact_type, context)
+        self.last_model = getattr(self._provider, "model", self._provider.name)
+        for chunk in self._provider.stream(prompt):
+            yield chunk

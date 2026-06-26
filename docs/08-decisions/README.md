@@ -12,6 +12,7 @@ their own docs and linked here.
 | [0002](../02-architecture/adr/0002-tech-stack.md) | Technology stack |
 | [0003](../02-architecture/adr/0003-authentication.md) | Authentication & GitHub authorization |
 | [0004](../02-architecture/adr/0004-artifact-abstraction.md) | Generalize VisionArtifact into a typed Artifact |
+| [0005](../02-architecture/adr/0005-streaming-generation.md) | Streaming generation over SSE |
 
 New ADRs use the
 [template](https://github.com/shubhamhingne/.github/blob/main/docs/adr/0000-template.md).

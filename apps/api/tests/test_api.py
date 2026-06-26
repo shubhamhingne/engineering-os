@@ -41,6 +41,24 @@ def test_vision_then_prd_flow(client):
     assert sorted(types) == ["prd", "vision"]
 
 
+def test_stream_vision_emits_stages_and_persists(client):
+    project_id = _new_project(client)
+    with client.stream("POST", f"/api/v1/projects/{project_id}/artifacts/vision/stream") as r:
+        assert r.status_code == 200
+        body = "".join(r.iter_text())
+    assert "event: stage" in body
+    assert "event: token" in body
+    assert "event: done" in body
+    # the streamed content was persisted as a version
+    got = client.get(f"/api/v1/projects/{project_id}/artifacts/vision")
+    assert got.status_code == 200 and "# Product Vision" in got.json()["content"]
+
+
+def test_stream_prd_requires_vision_409(client):
+    project_id = _new_project(client)
+    assert client.post(f"/api/v1/projects/{project_id}/artifacts/prd/stream").status_code == 409
+
+
 def test_edit_creates_version_and_history(client):
     project_id = _new_project(client)
     client.post(f"/api/v1/projects/{project_id}/artifacts/vision")

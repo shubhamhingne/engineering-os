@@ -1,6 +1,11 @@
 """Generic typed-artifact endpoints. One set of routes serves Vision, PRD, and future types —
 no per-type duplication (the payoff of the Artifact abstraction, ADR-0004)."""
+import json
+import time
+from collections.abc import Iterator
+
 from fastapi import APIRouter, Depends, HTTPException
+from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 
 from ...adapters.db.models import ArtifactVersion
@@ -63,6 +68,64 @@ def generate_artifact(
     except ValueError as exc:
         raise HTTPException(status_code=422, detail=str(exc))
     return _out(artifact_type, artifacts.add_version(project_id, artifact_type, result.content, "ai", result.model))
+
+
+def _sse(event: str, data: dict) -> str:
+    return f"event: {event}\ndata: {json.dumps(data)}\n\n"
+
+
+@router.post("/projects/{project_id}/artifacts/{artifact_type}/stream")
+def stream_artifact(
+    project_id: str,
+    artifact_type: str,
+    db: Session = Depends(get_db),
+    provider: AIProvider = Depends(get_provider),
+) -> StreamingResponse:
+    _require_type(artifact_type)
+    project = _require_project(db, project_id)
+    artifacts = ArtifactService(db)
+
+    if artifact_type == "vision":
+        context = {"idea": project.idea}
+    else:
+        vision = artifacts.current(project_id, "vision")
+        if vision is None:
+            raise HTTPException(status_code=409, detail="generate the Vision before the PRD")
+        context = {"vision": vision.content}
+
+    generation = GenerationService(provider)
+
+    def event_stream() -> Iterator[str]:
+        started = time.perf_counter()
+        for stage in ("building_context", "selecting_prompt", "calling_model"):
+            yield _sse("stage", {"stage": stage})
+
+        parts: list[str] = []
+        try:
+            for chunk in generation.stream(artifact_type, context):
+                parts.append(chunk)
+                yield _sse("token", {"text": chunk})
+        except Exception as exc:  # surface provider failures to the client
+            yield _sse("error", {"detail": str(exc)})
+            return
+
+        content = "".join(parts)
+        yield _sse("stage", {"stage": "formatting"})
+        version = artifacts.add_version(project_id, artifact_type, content, "ai", generation.last_model)
+        yield _sse("stage", {"stage": "saved"})
+        yield _sse(
+            "done",
+            {
+                "type": artifact_type,
+                "version": version.version_no,
+                "source": version.source,
+                "model": version.model,
+                "tokens_out": len(content.split()),
+                "latency_ms": int((time.perf_counter() - started) * 1000),
+            },
+        )
+
+    return StreamingResponse(event_stream(), media_type="text/event-stream")
 
 
 @router.get("/projects/{project_id}/artifacts/{artifact_type}", response_model=ArtifactVersionOut)

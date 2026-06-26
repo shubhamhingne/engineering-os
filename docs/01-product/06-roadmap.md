@@ -20,6 +20,10 @@ deliberately, so the portfolio value compounds with the product.
   with tests and observability.
 - **Shipped (Day 10):** Artifact abstraction (typed `Artifact` + version history, ADR-0004) and
   PRD generation from the Vision; tabbed UI (Vision · PRD · Activity); 14 tests passing.
+- **Shipped (Day 10.5–11):** signature four-zone Engineering Workspace (designed, then implemented
+  as a 12-component library on one I/O hook).
+- **Shipped (Day 12):** streaming generation (SSE, ADR-0005) — live stages + growing content,
+  functional command palette (⌘K), version diff, premium empty states; 16 tests passing.
 
 **Stack showcased:** Next.js (web) · FastAPI (Python) · PostgreSQL · Auth · LLM integration ·
 GitHub API · Docker · CI/CD.

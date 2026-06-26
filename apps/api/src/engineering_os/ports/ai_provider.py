@@ -1,5 +1,7 @@
-"""The AI provider port. The core builds prompts (its opinion); the provider just executes one.
-This keeps prompt logic in the domain and providers trivially swappable (Principle 5)."""
+"""The AI provider port. The core builds prompts (its opinion); the provider executes one,
+either all at once (`generate`) or as a token stream (`stream`). Keeps prompt logic in the
+domain and providers trivially swappable (Principle 5)."""
+from collections.abc import Iterator
 from dataclasses import dataclass
 from typing import Protocol, runtime_checkable
 
@@ -22,7 +24,12 @@ class GenerationResult:
 @runtime_checkable
 class AIProvider(Protocol):
     name: str
+    model: str
 
     def generate(self, prompt: Prompt) -> GenerationResult:
         """Execute a prompt and return the generated Markdown plus usage."""
+        ...
+
+    def stream(self, prompt: Prompt) -> Iterator[str]:
+        """Execute a prompt, yielding content chunks as they are produced."""
         ...

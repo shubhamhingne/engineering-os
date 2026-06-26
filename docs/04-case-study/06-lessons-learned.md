@@ -41,6 +41,19 @@ which is itself one of the lessons. These are reflections, not achievements.
   each was wrong for the MVP. Reaching for sophistication before the simple version is proven is a
   common senior-engineer trap I had to actively resist.
 
+## On making it feel alive (Day 12 — streaming)
+
+- **The "magical" feeling is mostly honesty about progress.** Streaming the real stages
+  (building context → calling the model → drafting → saved) and letting the content grow isn't a
+  gimmick — it's surfacing what the system is *actually* doing. The port already supported it
+  (`stream` is just another method), so the moat was real, not theater.
+- **A deterministic fake stream made the experience testable.** The fake provider streams in
+  fixed chunks, so the whole SSE pipeline (stages → tokens → done → persisted version) is proven
+  by tests with no network — the same payoff as slice #1, now for streaming.
+- **SSE-over-POST forced a small, honest design choice.** `EventSource` is GET-only, so the client
+  uses `fetch` + `ReadableStream`. Naming that constraint in [ADR-0005](../02-architecture/adr/0005-streaming-generation.md)
+  beats discovering it mid-implementation.
+
 ## On the workspace architecture (Day 11 — the signature screen)
 
 - **Why one shell, many capabilities.** Instead of a page per artifact, the workspace is a single

@@ -11,10 +11,12 @@ import { TokenCostBadge } from "./TokenCostBadge";
 export function AIContextPanel({
   artifact,
   generating,
+  stage = 6,
   onGenerate,
 }: {
   artifact: Artifact | null;
   generating: boolean;
+  stage?: number;
   onGenerate: () => void;
 }) {
   return (
@@ -29,7 +31,7 @@ export function AIContextPanel({
 
       <TokenCostBadge tokens={1231} costCents={1.42} />
       <MetadataInspector artifact={artifact} />
-      <GenerationTimeline active={generating} current={generating ? 2 : 6} />
+      <GenerationTimeline active={generating} current={stage} />
 
       <Button variant="primary" onClick={onGenerate} disabled={generating} className="w-full">
         <Sparkles className="h-4 w-4" />

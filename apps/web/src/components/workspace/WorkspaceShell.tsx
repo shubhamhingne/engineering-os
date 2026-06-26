@@ -1,9 +1,10 @@
 "use client";
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { Search } from "lucide-react";
-import type { ArtifactType } from "@/lib/api";
+import { Search, Sparkles } from "lucide-react";
+import { streamArtifact, type ArtifactType } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { fadeRise } from "@/lib/motion";
 import { useWorkspace } from "./useWorkspace";
@@ -14,31 +15,63 @@ import { MarkdownPreview } from "./MarkdownPreview";
 import { DiffViewer } from "./DiffViewer";
 import { AIContextPanel } from "./AIContextPanel";
 import { BottomActivityPanel } from "./BottomActivityPanel";
+import { CommandPalette, type Command } from "./CommandPalette";
 
 const LABEL: Record<string, string> = { vision: "Vision", prd: "PRD", readme: "README", adr: "ADR" };
+const EMPTY: Record<string, string> = {
+  vision: "Generate a Vision from your idea to start the lifecycle.",
+  prd: "Generate your first Product Requirements Document — it will be created from your approved Vision.",
+  readme: "Generate a README once your artifacts are ready.",
+  adr: "Record your first architecture decision.",
+};
+const STAGE_INDEX: Record<string, number> = {
+  building_context: 0,
+  selecting_prompt: 1,
+  calling_model: 2,
+  formatting: 4,
+  saved: 5,
+};
 
-// The signature screen: composes the four zones. One shell, many artifact capabilities.
 export function WorkspaceShell({ projectId }: { projectId: string }) {
   const ws = useWorkspace(projectId);
+  const router = useRouter();
   const [view, setView] = useState<ViewMode>("markdown");
   const [draft, setDraft] = useState("");
   const [dirty, setDirty] = useState(false);
   const [generating, setGenerating] = useState(false);
+  const [stage, setStage] = useState(6);
   const [actionError, setActionError] = useState<string | null>(null);
 
   const saved = ws.artifact?.content ?? "";
 
-  // Reset the draft when the loaded artifact (or active type) changes.
   useEffect(() => {
-    setDraft(saved);
-    setDirty(false);
-  }, [saved, ws.type]);
+    if (!generating) {
+      setDraft(saved);
+      setDirty(false);
+    }
+  }, [saved, ws.type, generating]);
 
-  async function handleGenerate() {
+  async function handleGenerate(type: ArtifactType = ws.type) {
+    if (type !== ws.type) await ws.selectType(type);
     setGenerating(true);
     setActionError(null);
+    setStage(0);
+    setDraft("");
+    setView("markdown");
     try {
-      await ws.generate();
+      await streamArtifact(projectId, type, {
+        onStage: (s) => setStage(STAGE_INDEX[s] ?? 3),
+        onToken: (t) => {
+          setStage(3);
+          setDraft((d) => d + t);
+        },
+        onDone: async () => {
+          setStage(6);
+          await ws.reload();
+          setDirty(false);
+        },
+        onError: (d) => setActionError(d),
+      });
     } catch (e) {
       setActionError((e as Error).message);
     } finally {
@@ -55,11 +88,33 @@ export function WorkspaceShell({ projectId }: { projectId: string }) {
     }
   }
 
+  // ⌘S to save
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "s") {
+        e.preventDefault();
+        if (dirty && draft.trim()) void handleSave();
+      }
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }); // re-bind each render so it sees current draft/dirty
+
+  const commands: Command[] = [
+    { id: "home", label: "Go to Projects", group: "Navigate", shortcut: "⌘H", run: () => router.push("/") },
+    { id: "gen-vision", label: "Generate Vision", group: "Actions", run: () => void handleGenerate("vision") },
+    { id: "gen-prd", label: "Generate PRD", group: "Actions", run: () => void handleGenerate("prd") },
+    { id: "save", label: "Save artifact", group: "Actions", shortcut: "⌘S", enabled: dirty, run: () => void handleSave() },
+    { id: "open-vision", label: "Open Vision", group: "Artifacts", run: () => void ws.selectType("vision") },
+    { id: "open-prd", label: "Open PRD", group: "Artifacts", run: () => void ws.selectType("prd") },
+  ];
+
   const banner = actionError ?? ws.error;
 
   return (
     <div className="grid h-screen grid-rows-[48px_minmax(0,1fr)_168px] bg-base text-text">
-      {/* GLOBAL NAV */}
+      <CommandPalette commands={commands} />
+
       <header className="flex items-center gap-3.5 border-b border-border px-4">
         <Link href="/" className="text-sm font-semibold">
           Engineering OS
@@ -74,7 +129,6 @@ export function WorkspaceShell({ projectId }: { projectId: string }) {
         <div className="h-6 w-6 rounded-full bg-gradient-to-br from-action to-accent" aria-hidden />
       </header>
 
-      {/* MAIN — three zones */}
       <div className="grid grid-cols-[236px_minmax(0,1fr)_320px] overflow-hidden">
         <aside className="overflow-auto border-r border-border">
           <ArtifactTree
@@ -88,9 +142,14 @@ export function WorkspaceShell({ projectId }: { projectId: string }) {
           <div className="flex items-center gap-3 border-b border-border px-5 py-3">
             <span className="font-semibold">{LABEL[ws.type]}</span>
             {ws.artifact && (
-              <span className="rounded-full border border-line px-2 py-0.5 font-mono text-[11px] text-text-secondary">
+              <motion.span
+                key={ws.artifact.version}
+                initial={{ scale: 0.9, opacity: 0.6 }}
+                animate={{ scale: 1, opacity: 1 }}
+                className="rounded-full border border-line px-2 py-0.5 font-mono text-[11px] text-text-secondary"
+              >
                 v{ws.artifact.version} · {ws.artifact.source}
-              </span>
+              </motion.span>
             )}
             <div className="ml-auto flex items-center gap-2">
               <ArtifactTabs value={view} onChange={setView} />
@@ -115,11 +174,13 @@ export function WorkspaceShell({ projectId }: { projectId: string }) {
           >
             {ws.loading ? (
               <p className="px-10 py-6 text-sm text-text-secondary">Loading…</p>
-            ) : !ws.artifact && !draft ? (
+            ) : !ws.artifact && !draft && !generating ? (
               <div className="grid h-full place-items-center px-10 text-center">
-                <div>
-                  <p className="text-text-secondary">No {LABEL[ws.type]} yet.</p>
-                  <Button variant="outline" className="mt-3" onClick={handleGenerate} disabled={generating}>
+                <div className="max-w-sm">
+                  <Sparkles className="mx-auto mb-3 h-6 w-6 text-accent" />
+                  <p className="font-medium text-text">No {LABEL[ws.type]} yet</p>
+                  <p className="mt-1 text-[13px] text-text-secondary">{EMPTY[ws.type]}</p>
+                  <Button variant="outline" className="mt-4" onClick={() => handleGenerate()} disabled={generating}>
                     Generate {LABEL[ws.type]}
                   </Button>
                 </div>
@@ -141,11 +202,15 @@ export function WorkspaceShell({ projectId }: { projectId: string }) {
         </section>
 
         <aside className="overflow-hidden">
-          <AIContextPanel artifact={ws.artifact} generating={generating} onGenerate={handleGenerate} />
+          <AIContextPanel
+            artifact={ws.artifact}
+            generating={generating}
+            stage={stage}
+            onGenerate={() => handleGenerate()}
+          />
         </aside>
       </div>
 
-      {/* BOTTOM */}
       <BottomActivityPanel versions={ws.versions} />
     </div>
   );

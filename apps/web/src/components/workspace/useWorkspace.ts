@@ -75,5 +75,14 @@ export function useWorkspace(projectId: string) {
     [projectId, type],
   );
 
-  return { project, type, artifact, versions, loading, error, selectType, generate, save };
+  const reload = useCallback(async () => {
+    await loadArtifact(type);
+    try {
+      setProject(await api.getProject(projectId));
+    } catch {
+      /* keep current project */
+    }
+  }, [loadArtifact, type, projectId]);
+
+  return { project, type, artifact, versions, loading, error, selectType, generate, save, reload };
 }

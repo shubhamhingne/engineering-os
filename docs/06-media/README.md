@@ -20,6 +20,20 @@ integration, e2e) and a live run.
    "provider":"fake","model":"fake-1","tokens_in":11,"tokens_out":74,"latency_ms":0}
   ```
 
+## Day 12 — Make it feel alive (streaming + interactions)
+
+Real **streaming generation** (SSE, [ADR-0005](../02-architecture/adr/0005-streaming-generation.md)) —
+the artifact grows live and the generation timeline advances through stages. Plus a functional
+command palette (⌘K), version diff, and premium empty states. **16 tests passing** (2 streaming).
+
+- ![Streaming generation](screenshots/artifact-workspace-streaming.png)
+- **Live SSE event sequence** (captured from the running API):
+  ```
+  stage×3  →  token×10  →  stage×2  →  done
+  (building_context · selecting_prompt · calling_model → tokens → formatting · saved → done)
+  ```
+- Performance budgets + reports: [performance/](performance/).
+
 ## Day 10.5 — Design Sprint (the signature workspace)
 
 High-fidelity mockups of the Engineering Workspace, designed before implementation
