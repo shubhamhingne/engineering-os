@@ -19,6 +19,19 @@ flowchart LR
 6. **Review + green CI** required to merge.
 7. **Squash-merge** with a Conventional Commit title; branch auto-deletes.
 
+## UI features follow the Pro Max workflow
+
+Any change with a visible surface adds these stages (no UI feature skips them):
+
+```
+UX review → interaction design → component design → implementation
+→ a11y review → performance review → visual QA → documentation
+```
+
+And every UI PR ships **design evidence**: before/after screenshots, a short recording, an a11y
+checklist, and responsive validation — saved under [`docs/06-media/`](../06-media/). The full
+bar is the [UI/UX Pro Max standard](../03-design-system/17-ui-ux-pro-max.md).
+
 ## Every feature follows the repository lifecycle
 
 A feature isn't "done" at code-complete. It follows the same lifecycle as the repo

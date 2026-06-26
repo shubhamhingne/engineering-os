@@ -12,6 +12,11 @@ replaces if reconsidered.
 | React + TypeScript | UI + types | Strict typing; shared contracts |
 | Tailwind CSS | Styling | Token-driven; maps 1:1 to the design system |
 | shadcn/ui | Component base | Unstyled, accessible primitives we theme with our tokens — own the code, no lock-in |
+| Radix UI | Primitives | Accessible, unstyled behavior under shadcn (focus, a11y) |
+| Framer Motion | Motion | Purposeful, state-communicating animation only ([UI/UX Pro Max](../03-design-system/17-ui-ux-pro-max.md)) |
+
+> **Gap to close:** the slice #1–2 frontend uses plain Tailwind, not yet shadcn/Radix/Framer
+> Motion. The next UI slice elevates the existing screens to this stack and the Pro Max standard.
 
 ## Backend (`apps/api`)
 
