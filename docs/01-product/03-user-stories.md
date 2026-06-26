@@ -25,13 +25,19 @@ I know what to work on next.
 ## Epic 3 — AI artifact generation
 
 **US-3.1** — As a developer, I want the system to draft a Product Vision from my idea, so that
-I start with structure instead of a blank page.
-- [ ] Vision is generated and displayed as editable Markdown.
-- [ ] I can regenerate or edit, and changes are saved.
+I start with structure instead of a blank page. **✅ Shipped (slice #1).**
+- [x] Vision is generated and displayed as editable Markdown.
+- [x] I can regenerate or edit, and changes are saved.
 
 **US-3.2** — As a developer, I want to generate a PRD from the vision, so that requirements
-and scope are explicit.
-- [ ] PRD references the vision; sections are editable.
+and scope are explicit. **✅ Shipped (slice #2).**
+- [x] PRD is generated from the project's current Vision; sections are editable.
+- [x] Generating a PRD without a Vision is blocked with a clear message.
+
+**US-3.6** — As a developer, I want every save to create a new version, so that I never lose
+prior work and can review history. **✅ Shipped (slice #2).**
+- [x] Each AI generation and human edit creates an immutable version (v1, v2, …).
+- [x] Version history is visible per artifact (restore arrives in a later slice).
 
 **US-3.3** — As a developer, I want an architecture overview and at least one ADR, so that key
 decisions are recorded.

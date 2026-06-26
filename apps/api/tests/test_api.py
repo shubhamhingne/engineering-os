@@ -1,40 +1,53 @@
-"""Integration tests — the API with a test DB and the fake provider."""
+"""Integration tests — the artifact-centric API with a test DB and the fake provider."""
+
+
+def _new_project(client):
+    return client.post("/api/v1/projects", json={"title": "T", "idea": "an idea"}).json()["id"]
 
 
 def test_create_list_get(client):
     created = client.post("/api/v1/projects", json={"title": "T", "idea": "an idea"})
     assert created.status_code == 201
     project_id = created.json()["id"]
-
-    listing = client.get("/api/v1/projects")
-    assert listing.status_code == 200 and len(listing.json()) == 1
-
+    assert len(client.get("/api/v1/projects").json()) == 1
     fetched = client.get(f"/api/v1/projects/{project_id}")
-    assert fetched.status_code == 200 and fetched.json()["idea"] == "an idea"
+    assert fetched.status_code == 200 and fetched.json()["artifact_types"] == []
 
 
 def test_create_validation_rejects_empty(client):
     assert client.post("/api/v1/projects", json={"title": "", "idea": ""}).status_code == 422
 
 
-def test_get_missing_project_404(client):
-    assert client.get("/api/v1/projects/missing").status_code == 404
+def test_unsupported_artifact_type_404(client):
+    project_id = _new_project(client)
+    assert client.post(f"/api/v1/projects/{project_id}/artifacts/readme").status_code == 404
 
 
-def test_vision_generate_then_get_then_save(client):
-    project_id = client.post("/api/v1/projects", json={"title": "T", "idea": "an idea"}).json()["id"]
-
-    generated = client.post(f"/api/v1/projects/{project_id}/vision")
-    assert generated.status_code == 201 and generated.json()["source"] == "ai"
-
-    fetched = client.get(f"/api/v1/projects/{project_id}/vision")
-    assert fetched.status_code == 200 and "# Product Vision" in fetched.json()["content"]
-
-    saved = client.put(f"/api/v1/projects/{project_id}/vision", json={"content": "my edit"})
-    body = saved.json()
-    assert saved.status_code == 200 and body["source"] == "human" and body["version"] == 2
+def test_prd_requires_vision_409(client):
+    project_id = _new_project(client)
+    assert client.post(f"/api/v1/projects/{project_id}/artifacts/prd").status_code == 409
 
 
-def test_get_vision_before_generation_404(client):
-    project_id = client.post("/api/v1/projects", json={"title": "T", "idea": "x"}).json()["id"]
-    assert client.get(f"/api/v1/projects/{project_id}/vision").status_code == 404
+def test_vision_then_prd_flow(client):
+    project_id = _new_project(client)
+    vision = client.post(f"/api/v1/projects/{project_id}/artifacts/vision")
+    assert vision.status_code == 201 and vision.json()["type"] == "vision" and vision.json()["version"] == 1
+
+    prd = client.post(f"/api/v1/projects/{project_id}/artifacts/prd")
+    assert prd.status_code == 201 and prd.json()["type"] == "prd"
+    assert "# Product Requirements Document" in prd.json()["content"]
+
+    types = client.get(f"/api/v1/projects/{project_id}").json()["artifact_types"]
+    assert sorted(types) == ["prd", "vision"]
+
+
+def test_edit_creates_version_and_history(client):
+    project_id = _new_project(client)
+    client.post(f"/api/v1/projects/{project_id}/artifacts/vision")
+    saved = client.put(
+        f"/api/v1/projects/{project_id}/artifacts/vision", json={"content": "edited"}
+    ).json()
+    assert saved["version"] == 2 and saved["source"] == "human"
+
+    versions = client.get(f"/api/v1/projects/{project_id}/artifacts/vision/versions").json()
+    assert [v["version"] for v in versions] == [2, 1]

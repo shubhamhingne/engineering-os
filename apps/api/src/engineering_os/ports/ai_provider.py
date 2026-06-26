@@ -1,6 +1,14 @@
-"""The AI provider port. The application core depends on this, never on a vendor SDK."""
+"""The AI provider port. The core builds prompts (its opinion); the provider just executes one.
+This keeps prompt logic in the domain and providers trivially swappable (Principle 5)."""
 from dataclasses import dataclass
 from typing import Protocol, runtime_checkable
+
+
+@dataclass
+class Prompt:
+    system: str
+    user: str
+    artifact_type: str  # carried for observability + provider-side tuning
 
 
 @dataclass
@@ -15,6 +23,6 @@ class GenerationResult:
 class AIProvider(Protocol):
     name: str
 
-    def generate_vision(self, idea: str) -> GenerationResult:
-        """Generate a product Vision (Markdown) from a one-line idea."""
+    def generate(self, prompt: Prompt) -> GenerationResult:
+        """Execute a prompt and return the generated Markdown plus usage."""
         ...

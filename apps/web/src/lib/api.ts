@@ -1,21 +1,31 @@
 // Thin API client. The browser never holds secrets; all calls hit the FastAPI backend.
 const BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
+export type ArtifactType = "vision" | "prd";
+
 export type Project = {
   id: string;
   title: string;
   idea: string;
-  has_vision: boolean;
+  artifact_types: string[];
   created_at: string;
   updated_at: string;
 };
 
-export type Vision = {
-  content: string;
-  source: string;
+export type Artifact = {
+  type: string;
   version: number;
+  source: string;
+  content: string;
   model?: string | null;
-  updated_at: string;
+  created_at: string;
+};
+
+export type VersionSummary = {
+  version: number;
+  source: string;
+  model?: string | null;
+  created_at: string;
 };
 
 async function req<T>(path: string, init?: RequestInit): Promise<T> {
@@ -35,8 +45,12 @@ export const api = {
   createProject: (title: string, idea: string) =>
     req<Project>("/projects", { method: "POST", body: JSON.stringify({ title, idea }) }),
   getProject: (id: string) => req<Project>(`/projects/${id}`),
-  generateVision: (id: string) => req<Vision>(`/projects/${id}/vision`, { method: "POST" }),
-  getVision: (id: string) => req<Vision>(`/projects/${id}/vision`),
-  saveVision: (id: string, content: string) =>
-    req<Vision>(`/projects/${id}/vision`, { method: "PUT", body: JSON.stringify({ content }) }),
+
+  generateArtifact: (id: string, type: ArtifactType) =>
+    req<Artifact>(`/projects/${id}/artifacts/${type}`, { method: "POST" }),
+  getArtifact: (id: string, type: ArtifactType) => req<Artifact>(`/projects/${id}/artifacts/${type}`),
+  saveArtifact: (id: string, type: ArtifactType, content: string) =>
+    req<Artifact>(`/projects/${id}/artifacts/${type}`, { method: "PUT", body: JSON.stringify({ content }) }),
+  getVersions: (id: string, type: ArtifactType) =>
+    req<VersionSummary[]>(`/projects/${id}/artifacts/${type}/versions`),
 };

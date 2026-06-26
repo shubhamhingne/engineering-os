@@ -18,6 +18,8 @@ deliberately, so the portfolio value compounds with the product.
 - PostgreSQL persistence; structured logging
 - **Shipped (Day 9):** Vision slice — create project → generate Vision → edit → save → reopen,
   with tests and observability.
+- **Shipped (Day 10):** Artifact abstraction (typed `Artifact` + version history, ADR-0004) and
+  PRD generation from the Vision; tabbed UI (Vision · PRD · Activity); 14 tests passing.
 
 **Stack showcased:** Next.js (web) · FastAPI (Python) · PostgreSQL · Auth · LLM integration ·
 GitHub API · Docker · CI/CD.

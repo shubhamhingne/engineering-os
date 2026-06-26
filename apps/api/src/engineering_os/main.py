@@ -4,7 +4,8 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from .config import settings
 from .db import init_db
-from .interface.http.projects import router
+from .interface.http.artifacts import router as artifacts_router
+from .interface.http.projects import router as projects_router
 from .observability import setup_logging
 
 
@@ -24,7 +25,8 @@ def create_app() -> FastAPI:
     def health() -> dict[str, str]:
         return {"status": "ok"}
 
-    app.include_router(router)
+    app.include_router(projects_router)
+    app.include_router(artifacts_router)
     return app
 
 

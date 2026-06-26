@@ -11,6 +11,7 @@ their own docs and linked here.
 | [0001](../02-architecture/adr/0001-architecture.md) | Modular monolith with hexagonal core |
 | [0002](../02-architecture/adr/0002-tech-stack.md) | Technology stack |
 | [0003](../02-architecture/adr/0003-authentication.md) | Authentication & GitHub authorization |
+| [0004](../02-architecture/adr/0004-artifact-abstraction.md) | Generalize VisionArtifact into a typed Artifact |
 
 New ADRs use the
 [template](https://github.com/shubhamhingne/.github/blob/main/docs/adr/0000-template.md).

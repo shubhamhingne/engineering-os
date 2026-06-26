@@ -41,6 +41,23 @@ which is itself one of the lessons. These are reflections, not achievements.
   each was wrong for the MVP. Reaching for sophistication before the simple version is proven is a
   common senior-engineer trap I had to actively resist.
 
+## On generalizing the domain (Day 10 — slice #2)
+
+- **Why we generalized `VisionArtifact` → `Artifact`.** Slice #1 modelled *Vision*; the product
+  is about *artifacts*. Rather than copy the Vision table/service/endpoint for PRD (and again for
+  README, ADR), we refactored to a typed `Artifact` + immutable `ArtifactVersion` *before* adding
+  PRD. The result: PRD shipped as a new enum value, a prompt template, and zero new endpoints or
+  UI. Adding README and ADR later is now nearly free. ([ADR-0004](../02-architecture/adr/0004-artifact-abstraction.md))
+- **Refactor-before-feature paid off immediately.** Doing the generalization first meant the PRD
+  feature was *small* — the architecture absorbed it. Had we added PRD first and refactored later,
+  we'd have paid twice and risked a migration with real data.
+- **The week of design was the reason this was cheap.** The artifact-centric domain we wrote on
+  Day 5 was the target; Day 10 just *realized* it. The refactor felt like filling in a shape that
+  was already drawn — which is exactly what up-front design is supposed to buy.
+- **Version history validated the immutability principle.** "Everything generated belongs in Git;
+  no hidden state" became concrete: every generate and edit appends a version, nothing is
+  overwritten, and history is visible. The principle stopped being a slogan and became a feature.
+
 ## On implementation (Day 9 — first vertical slice)
 
 - **The architecture survived contact with code.** Building one workflow end-to-end (create →

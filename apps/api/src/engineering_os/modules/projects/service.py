@@ -1,10 +1,8 @@
-"""Projects module — the aggregate that owns its Vision artifact."""
-from typing import Optional
-
+"""Projects module — the aggregate root. Artifacts are managed via ArtifactService."""
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from ...adapters.db.models import Project, VisionArtifact
+from ...adapters.db.models import Project
 
 
 class NotFoundError(Exception):
@@ -30,20 +28,3 @@ class ProjectService:
         if project is None:
             raise NotFoundError(project_id)
         return project
-
-    def get_vision(self, project_id: str) -> Optional[VisionArtifact]:
-        return self.get(project_id).vision
-
-    def set_vision(self, project_id: str, content: str, source: str, model: Optional[str] = None) -> VisionArtifact:
-        project = self.get(project_id)
-        if project.vision is None:
-            project.vision = VisionArtifact(content=content, source=source, version=1, model=model)
-        else:
-            project.vision.content = content
-            project.vision.source = source
-            project.vision.version += 1
-            if model:
-                project.vision.model = model
-        self._db.commit()
-        self._db.refresh(project.vision)
-        return project.vision

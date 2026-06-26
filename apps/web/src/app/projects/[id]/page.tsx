@@ -1,28 +1,28 @@
 "use client";
 import { use, useEffect, useState } from "react";
 import Link from "next/link";
-import { api, type Project, type Vision } from "@/lib/api";
-import { VisionEditor } from "@/components/VisionEditor";
+import { api, type Project } from "@/lib/api";
+import { ArtifactEditor } from "@/components/ArtifactEditor";
+
+const TABS = [
+  { key: "vision", label: "Vision" },
+  { key: "prd", label: "PRD" },
+  { key: "activity", label: "Activity" },
+] as const;
+
+type Tab = (typeof TABS)[number]["key"];
 
 export default function ProjectDetail({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const [project, setProject] = useState<Project | null>(null);
-  const [vision, setVision] = useState<Vision | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [ready, setReady] = useState(false);
+  const [tab, setTab] = useState<Tab>("vision");
 
   useEffect(() => {
     (async () => {
       try {
-        const p = await api.getProject(id);
-        setProject(p);
-        if (p.has_vision) {
-          try {
-            setVision(await api.getVision(id));
-          } catch {
-            /* no vision yet */
-          }
-        }
+        setProject(await api.getProject(id));
       } catch (e) {
         setError((e as Error).message);
       } finally {
@@ -41,7 +41,30 @@ export default function ProjectDetail({ params }: { params: Promise<{ id: string
       </Link>
       <h1 className="mt-2 text-xl font-semibold">{project.title}</h1>
       <p className="mt-1 text-sm text-text-secondary">{project.idea}</p>
-      <VisionEditor projectId={id} initial={vision} />
+
+      <nav className="mt-4 flex gap-1 border-b border-border">
+        {TABS.map((t) => (
+          <button
+            key={t.key}
+            onClick={() => setTab(t.key)}
+            className={
+              tab === t.key
+                ? "border-b-2 border-accent px-3 py-2 text-sm text-text"
+                : "px-3 py-2 text-sm text-text-secondary"
+            }
+          >
+            {t.label}
+          </button>
+        ))}
+      </nav>
+
+      {tab === "vision" && <ArtifactEditor projectId={id} type="vision" label="Vision" />}
+      {tab === "prd" && <ArtifactEditor projectId={id} type="prd" label="PRD" />}
+      {tab === "activity" && (
+        <div className="mt-6 rounded-md border border-border p-8 text-center text-text-secondary">
+          Activity — coming soon.
+        </div>
+      )}
     </div>
   );
 }

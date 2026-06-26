@@ -3,7 +3,16 @@ import json
 import logging
 import sys
 
-_AI_FIELDS = ("provider", "model", "tokens_in", "tokens_out", "latency_ms")
+_AI_FIELDS = (
+    "artifact_type",
+    "version_no",
+    "source",
+    "provider",
+    "model",
+    "tokens_in",
+    "tokens_out",
+    "latency_ms",
+)
 
 
 class JsonFormatter(logging.Formatter):

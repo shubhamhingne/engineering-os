@@ -47,7 +47,9 @@ export default function Dashboard() {
                 className="flex items-center justify-between px-4 py-3 hover:bg-raised"
               >
                 <span>{p.title}</span>
-                <span className="text-xs text-text-muted">{p.has_vision ? "Vision ✓" : "No vision"}</span>
+                <span className="text-xs text-text-muted">
+                  {p.artifact_types.length ? p.artifact_types.join(" · ") : "empty"}
+                </span>
               </Link>
             </li>
           ))}

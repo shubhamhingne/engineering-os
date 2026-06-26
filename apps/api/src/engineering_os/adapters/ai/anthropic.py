@@ -1,12 +1,6 @@
 """Anthropic provider — the one real adapter for the MVP. SDK imported lazily so the rest of
 the app (and tests with the fake) never require it."""
-from ...ports.ai_provider import GenerationResult
-
-_SYSTEM = (
-    "You are a principal product engineer. Given a one-line product idea, write a concise, "
-    "concrete product VISION in Markdown with sections: Problem, Vision, Why now, and What "
-    "success looks like. Be specific and opinionated. No marketing language."
-)
+from ...ports.ai_provider import GenerationResult, Prompt
 
 
 class AnthropicProvider:
@@ -16,17 +10,17 @@ class AnthropicProvider:
         self._api_key = api_key
         self._model = model
 
-    def generate_vision(self, idea: str) -> GenerationResult:
+    def generate(self, prompt: Prompt) -> GenerationResult:
         import anthropic  # lazy import — only needed when this provider is selected
 
         client = anthropic.Anthropic(api_key=self._api_key)
         message = client.messages.create(
             model=self._model,
-            max_tokens=1024,
-            system=_SYSTEM,
-            messages=[{"role": "user", "content": f"Product idea:\n{idea}\n\nWrite the Vision."}],
+            max_tokens=1500,
+            system=prompt.system,
+            messages=[{"role": "user", "content": prompt.user}],
         )
-        text = "".join(block.text for block in message.content if getattr(block, "type", "") == "text")
+        text = "".join(b.text for b in message.content if getattr(b, "type", "") == "text")
         return GenerationResult(
             content=text,
             model=self._model,
