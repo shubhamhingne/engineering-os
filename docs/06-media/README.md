@@ -20,6 +20,19 @@ integration, e2e) and a live run.
    "provider":"fake","model":"fake-1","tokens_in":11,"tokens_out":74,"latency_ms":0}
   ```
 
+## v1.0-α5 — The compiler specification (teachability)
+
+One document that defines the whole model as a *language specification* — what any implementation must
+satisfy, not how the current code works:
+[20 — The Engineering OS Compiler: a specification](../02-architecture/20-compiler-specification.md).
+
+- **Eight parts:** mental model · semantic model · compiler model · identity · extension model ·
+  invariants · design philosophy · *why we did **not** build X*.
+- **Success criterion:** a senior engineer reads it and can predict where a new capability belongs
+  before reading the implementation. Each extension point (graph · pass · renderer · publisher ·
+  repository adapter) is specified with its proof obligation: the existing fingerprint stays unchanged.
+- **Stance:** "if this document and the code disagree, fix the code" — the model is the source of truth.
+
 ## v1.0-α4 — Compiler hardening (property-based invariant testing)
 
 The invariants are now demonstrated over randomly generated pipelines, not just examples

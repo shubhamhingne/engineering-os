@@ -22,7 +22,9 @@ These constrain every decision below. A design that violates one is rejected.
 
 As the system matured into a semantic compiler, these principles were sharpened into a set of
 [compiler invariants](19-compiler-invariants.md) — the properties every feature must preserve (the
-compiler never knows the user, renderers never publish, passes declare their dependencies, …).
+compiler never knows the user, renderers never publish, passes declare their dependencies, …). For
+the whole model in one place — written as a specification of what any implementation must satisfy —
+see [20 — The Engineering OS Compiler: a specification](20-compiler-specification.md).
 
 ## Architecture style
 

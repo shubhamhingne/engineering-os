@@ -41,6 +41,23 @@ which is itself one of the lessons. These are reflections, not achievements.
   each was wrong for the MVP. Reaching for sophistication before the simple version is proven is a
   common senior-engineer trap I had to actively resist.
 
+## Release retrospective — v1.0-α5 (the compiler specification)
+
+1. **What user problem did this solve?** Understandability. The compiler was coherent in code but only
+   teachable by reading it. The [specification](../02-architecture/20-compiler-specification.md) makes
+   the whole model legible: a senior engineer can now predict where a new capability belongs before
+   opening the implementation.
+2. **What architectural decision made it possible?** Writing the guide as a *language specification*,
+   not documentation — defining what any implementation must satisfy, ending with the design
+   philosophy and an explicit "why we did **not** build X." It treats the model, not the code, as the
+   source of truth ("if this document and the code disagree, fix the code").
+3. **What trade-off did I consciously accept?** A release that ships prose, not features. At this
+   stage that is the higher-leverage work: the architecture is done; making it transferable is what
+   turns a coherent implementation into a coherent *theory*.
+4. **If I rebuilt this in a year, what would I change?** I'd have started the specification earlier and
+   grown it release by release — the negative-decisions section especially, which captures reasoning
+   that's easy to lose once it feels obvious.
+
 ## Release retrospective — v1.0-α4 (compiler hardening)
 
 1. **What user problem did this solve?** Trust in the engine, proven rather than asserted. The

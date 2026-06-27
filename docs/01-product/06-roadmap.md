@@ -79,8 +79,8 @@ Tracked as releases, not days — a real product roadmap.
 | v1.0-α2 | Dependency-driven execution — `ExecutionPlan` · minimal subgraph (ADR-0017) | ✅ shipped |
 | v1.0-α3 | `BuildManifest` — immutable, content-addressed compilation identity (ADR-0018) | ✅ shipped |
 | v1.0-α4 | Compiler hardening — property-based invariant testing, Hypothesis (ADR-0019) | ✅ shipped |
-| v1.0-α5 | Compiler guide — one teachable document of the whole model | next |
-| v1.0-α6 | AI-backed pass implementations — behind `CompilerPass`, deterministic fallback | planned |
+| v1.0-α5 | Compiler specification — the whole model as a teachable language spec | ✅ shipped |
+| v1.0-α6 | AI-backed pass implementations — behind `CompilerPass`, deterministic fallback | next |
 | v1.0-α7 | Compiler replay — reconstruct execution from the manifest | planned |
 | v1.0 | Public launch | planned |
 
