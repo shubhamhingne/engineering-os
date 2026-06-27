@@ -9,11 +9,13 @@ from typing import Optional
 
 from ...adapters.db.models import User, UserSession
 from ...ports.oauth import OAuthIdentity
+from .crypto import TokenCipher, get_token_cipher
 
 
 class IdentityService:
-    def __init__(self, db: Session) -> None:
+    def __init__(self, db: Session, cipher: Optional[TokenCipher] = None) -> None:
         self._db = db
+        self._cipher = cipher or get_token_cipher()
 
     def upsert_user(self, identity: OAuthIdentity) -> User:
         """Find-or-create by GitHub id, refreshing the mutable profile fields on each login."""
@@ -29,11 +31,20 @@ class IdentityService:
         return user
 
     def create_session(self, user_id: str, github_token: str) -> UserSession:
-        session = UserSession(id=secrets.token_urlsafe(32), user_id=user_id, github_token=github_token)
+        # The token is encrypted before it touches the column; it is never stored as plaintext (BR-02).
+        session = UserSession(
+            id=secrets.token_urlsafe(32),
+            user_id=user_id,
+            github_token=self._cipher.encrypt(github_token),
+        )
         self._db.add(session)
         self._db.commit()
         self._db.refresh(session)
         return session
+
+    def decrypt_token(self, session: UserSession) -> str:
+        """Recover the plaintext token at the point of use (never stored decrypted)."""
+        return self._cipher.decrypt(session.github_token)
 
     def get_session(self, session_id: str) -> Optional[UserSession]:
         if not session_id:

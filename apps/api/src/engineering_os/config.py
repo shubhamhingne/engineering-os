@@ -26,5 +26,10 @@ class Settings(BaseSettings):
     session_cookie: str = "eos_session"
     cookie_secure: bool = False                       # True behind HTTPS in production
 
+    # Encryption of third-party tokens at rest (BR-02). REQUIRED in production: any high-entropy
+    # secret. When unset, a deterministic insecure dev key is used and a warning is logged — tokens
+    # are still never stored as plaintext.
+    token_encryption_key: str = ""
+
 
 settings = Settings()

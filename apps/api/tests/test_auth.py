@@ -40,6 +40,32 @@ def test_credential_provider_rejects_empty_token():
         GitHubCredentialProvider("").get_publishing_credential("github")
 
 
+# --- Token encryption at rest (BR-02) -------------------------------------------------------------
+
+def test_token_cipher_round_trips_without_leaking_plaintext():
+    from engineering_os.modules.identity.crypto import TokenCipher
+
+    cipher = TokenCipher("a-test-key")
+    ciphertext = cipher.encrypt("gho_secret_token")
+    assert ciphertext != "gho_secret_token"
+    assert "gho_secret_token" not in ciphertext
+    assert cipher.decrypt(ciphertext) == "gho_secret_token"
+
+
+def test_github_token_is_encrypted_at_rest(anon_client, db):
+    from sqlalchemy import select
+
+    from engineering_os.adapters.db.models import UserSession
+    from engineering_os.modules.identity.service import IdentityService
+
+    _login(anon_client, "alice")  # fake provider mints the plaintext token "fake-token-for-alice"
+    row = db.scalars(select(UserSession)).first()
+    assert row is not None
+    assert row.github_token != "fake-token-for-alice"        # the column holds ciphertext
+    assert "fake-token-for-alice" not in row.github_token
+    assert IdentityService(db).decrypt_token(row) == "fake-token-for-alice"  # recovered only on demand
+
+
 # --- Federation: the OAuth flow -------------------------------------------------------------------
 
 def test_login_redirects_to_provider_with_state(anon_client):

@@ -49,7 +49,7 @@ class UserSession(Base):
 
     id: Mapped[str] = mapped_column(String, primary_key=True)
     user_id: Mapped[str] = mapped_column(ForeignKey("users.id"), index=True)
-    github_token: Mapped[str] = mapped_column(String(255))
+    github_token: Mapped[str] = mapped_column(Text)  # encrypted at rest (BR-02); ciphertext > 255 chars
     created_at: Mapped[dt.datetime] = mapped_column(DateTime(timezone=True), default=_now)
 
 

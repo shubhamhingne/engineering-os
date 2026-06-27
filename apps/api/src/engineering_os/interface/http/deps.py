@@ -77,12 +77,14 @@ def get_owned_project(
 
 
 def get_credential_provider(
-    request: Request, user: User = Depends(get_current_user)
+    request: Request, user: User = Depends(get_current_user), db: Session = Depends(get_db)
 ) -> CredentialProvider:
     """The session's GitHub token, wrapped as a CredentialProvider. Depends on get_current_user so
-    the session is already resolved and authenticated."""
+    the session is already resolved and authenticated. The token is decrypted only here, at the point
+    of use — it is never held in plaintext at rest (BR-02)."""
     session = request.state.session
-    return GitHubCredentialProvider(session.github_token)
+    token = IdentityService(db).decrypt_token(session)
+    return GitHubCredentialProvider(token)
 
 
 def get_github_client(credentials: CredentialProvider = Depends(get_credential_provider)):
