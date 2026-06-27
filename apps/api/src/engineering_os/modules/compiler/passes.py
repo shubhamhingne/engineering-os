@@ -21,7 +21,7 @@ from ..render.renderers import ArtifactBundle, RenderContext, RendererRegistry
 from ..repository.service import RepositoryState, build_repository_state
 from ...ports.repository import RepositoryReader
 from .cache import PassCache
-from .context import CompilationReport, CompilerContext, ContextKey, PassResult
+from .context import CompilationReport, CompilerContext, ContextKey, ExecutionPlan, PassResult
 from .graph import build_dependency_graph
 
 COMPILER_VERSION = "0.8.y"
@@ -207,6 +207,7 @@ def validate_pipeline(passes, seed_keys=SEED_KEYS) -> None:
 class CompilationResult:
     context: CompilerContext
     report: CompilationReport
+    plan: Optional[ExecutionPlan] = None
 
 
 def _cache_key(descriptor: PassDescriptor, input_hash: str, fingerprint: str) -> str:
@@ -237,23 +238,70 @@ class Compiler:
     def fingerprint(self) -> str:
         return compute_fingerprint(self._passes, self._seed_keys)
 
-    def run(self, seed: dict, previous: Optional[CompilationReport] = None) -> CompilationResult:
+    def _producers(self) -> dict:
+        producer = {k.name: "<seed>" for k in self._seed_keys}
+        for p in self._passes:
+            for o in p.descriptor.produces:
+                producer[o.name] = p.descriptor.id
+        return producer
+
+    def plan(self, seed: dict) -> ExecutionPlan:
+        """Predict the minimal work this compile implies — *before* executing. A pass is required if
+        any input it depends on will be recomputed (an upstream pass is required) or its own output is
+        not in the cache; otherwise it is reused. The listed order is already topological (the
+        validator guarantees it), so a single forward walk resolves dependencies."""
+        fingerprint = self.fingerprint
+        producer = self._producers()
         ctx = CompilerContext()
         for key, value in seed.items():
             ctx.set(key, value)
 
-        fingerprint = self.fingerprint
+        required: list[str] = []
+        required_set: set = set()
+        reused: list[str] = []
+        reasons: dict = {}
+        for p in self._passes:
+            d = p.descriptor
+            if any(producer.get(c.name) in required_set for c in d.consumes):
+                required.append(d.id); required_set.add(d.id)
+                reasons[d.id] = "required: an upstream pass re-executes"
+                continue
+            cached = None
+            if self._cache is not None and d.cacheable:
+                cached = self._cache.peek(_cache_key(d, _hash_slots(ctx, d.consumes), fingerprint))
+            if cached is not None:
+                reused.append(d.id)
+                reasons[d.id] = "reused: output is cached and inputs are unchanged"
+                for slot, value in cached.items():
+                    ctx.set(slot, value)
+            else:
+                required.append(d.id); required_set.add(d.id)
+                reasons[d.id] = (
+                    "required: pass is not cacheable (observes live state)"
+                    if not d.cacheable else "required: output not in cache"
+                )
+
+        edges = build_dependency_graph(self._passes, self._seed_keys).edges
+        return ExecutionPlan(fingerprint, required, reused, required, reasons, edges)
+
+    def run(self, seed: dict, previous: Optional[CompilationReport] = None) -> CompilationResult:
+        plan = self.plan(seed)
+        reused = set(plan.reused)
+        fingerprint = plan.fingerprint
+
+        ctx = CompilerContext()
+        for key, value in seed.items():
+            ctx.set(key, value)
+
         results: list[PassResult] = []
         total_start = time.perf_counter()
         for p in self._passes:
             d = p.descriptor
             warned_before = len(ctx.warnings)
             input_hash = _hash_slots(ctx, d.consumes)
-            cacheable = self._cache is not None and d.cacheable  # cacheable ⇒ deterministic (invariant)
-            key = _cache_key(d, input_hash, fingerprint) if cacheable else ""
 
-            cached = self._cache.get(key) if cacheable else None
-            if cached is not None:
+            if d.id in reused:
+                cached = self._cache.get(_cache_key(d, input_hash, fingerprint))
                 for slot, value in cached.items():
                     ctx.set(slot, value)
                 duration = 0
@@ -267,8 +315,8 @@ class Compiler:
                 duration = int((time.perf_counter() - start) * 1000)
                 reason = _invalidation_reason(d.id, input_hash, previous)
                 cache_hit = False
-                if cacheable:
-                    self._cache.put(key, produced)
+                if self._cache is not None and d.cacheable:
+                    self._cache.put(_cache_key(d, input_hash, fingerprint), produced)
 
             results.append(
                 PassResult(
@@ -304,7 +352,7 @@ class Compiler:
             state = ctx.get(REPOSITORY_STATE)
             report.commit_sha = state.published_commit
             report.publisher_result = state.sync_status
-        return CompilationResult(ctx, report)
+        return CompilationResult(ctx, report, plan)
 
 
 # --- The explainability pipeline (validated once, at import/startup) ------------------------------

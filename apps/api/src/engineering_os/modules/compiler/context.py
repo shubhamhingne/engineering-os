@@ -60,6 +60,20 @@ class CompilationReport:
     publisher_result: Optional[str] = None  # filled when a publish pass runs
 
 
+@dataclass
+class ExecutionPlan:
+    """The predictive counterpart to CompilationReport (ADR-0017). Built from the dependency graph
+    and the cache *before* execution, it states the minimal work a compile implies: which passes
+    must run, which are reused, and in what order. The report is historical; the plan is predictive."""
+
+    fingerprint: str
+    required: list[str]               # pass ids that must execute (topological order)
+    reused: list[str]                 # pass ids served from cache
+    order: list[str]                  # execution order of the required subgraph
+    reasons: dict                     # pass_id -> why it runs or is skipped
+    edges: list = field(default_factory=list)   # dependency-graph edges (producer, consumer)
+
+
 class CompilerContext:
     """The symbol table. Set/get slots by typed key; every write is type-checked, so a pass cannot
     smuggle the wrong shape into a slot the next pass trusts."""

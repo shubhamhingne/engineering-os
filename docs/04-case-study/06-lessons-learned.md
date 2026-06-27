@@ -41,6 +41,25 @@ which is itself one of the lessons. These are reflections, not achievements.
   each was wrong for the MVP. Reaching for sophistication before the simple version is proven is a
   common senior-engineer trap I had to actively resist.
 
+## Release retrospective — v1.0-α2 (dependency-driven execution)
+
+1. **What user problem did this solve?** Wasted recompilation. Change one input and the compiler now
+   runs *only* the passes that input affects — change the idea, and the knowledge/decision/explain
+   chain re-runs while an unrelated branch is reused. The compiler executes the work the dependency
+   graph implies, not a fixed list.
+2. **What architectural decision made it possible?** An explicit `ExecutionPlan` — the predictive
+   counterpart to `CompilationReport` — computed from the dependency graph and the cache *before*
+   executing: required vs reused, in topological order ([ADR-0017](../02-architecture/adr/0017-dependency-driven-execution.md)).
+   A pass is required iff something it transitively depends on will recompute, or its output isn't
+   cached. The headline test proves the minimal subgraph, not just the order.
+3. **What trade-off did I consciously accept?** I deliberately did **not** add parallel execution —
+   sequential topological stays deterministic, debuggable, and replayable; the graph already supports
+   parallelism later. And I folded "up-to-date" into "cached" rather than ship a dead category, since
+   a content-addressed cache makes them the same thing.
+4. **If I rebuilt this in a year, what would I change?** Nothing about the shape. This is the
+   culmination the descriptors, typed context, fingerprints, invalidation, and cache were building
+   toward — "the compiler no longer executes a pipeline; it executes only the implied work."
+
 ## Release retrospective — v1.0-α1 (pass-output caching)
 
 1. **What user problem did this solve?** Wasted work. A long-lived compiler now reuses any pass whose

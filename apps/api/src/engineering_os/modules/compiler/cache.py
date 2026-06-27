@@ -10,7 +10,13 @@ from typing import Optional, Protocol
 
 class PassCache(Protocol):
     def get(self, key: str) -> Optional[dict]:
-        """Return the cached produced-slots dict ({ContextKey: value}) for `key`, or None."""
+        """Return the cached produced-slots dict ({ContextKey: value}) for `key`, or None.
+        Counts toward hit/miss stats — this is an execution-time lookup."""
+        ...
+
+    def peek(self, key: str) -> Optional[dict]:
+        """Like get, but does NOT count — the planner uses it to predict reuse without polluting
+        the execution stats."""
         ...
 
     def put(self, key: str, outputs: dict) -> None:
@@ -33,6 +39,9 @@ class InMemoryPassCache:
             return self._store[key]
         self.misses += 1
         return None
+
+    def peek(self, key: str) -> Optional[dict]:
+        return self._store.get(key)
 
     def put(self, key: str, outputs: dict) -> None:
         self._store[key] = outputs

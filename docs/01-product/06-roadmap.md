@@ -76,8 +76,8 @@ Tracked as releases, not days — a real product roadmap.
 | Alpha-0.8.y | Compiler self-knowledge — fingerprint · pass versions · dependency graph (ADR-0014) | ✅ shipped |
 | Alpha-0.9 | Repository synchronization — `RepositorySyncPass` + `RepositoryState` (ADR-0015) | ✅ shipped |
 | v1.0-α1 | Pass-output caching — activates `cache_hit` · `artifacts_reused` (ADR-0016) | ✅ shipped |
-| v1.0-α2 | DAG scheduling — execute only the uncached subgraph (descriptors ready) | next |
-| v1.0-α3 | `BuildManifest` — the immutable receipt for one compilation | planned |
+| v1.0-α2 | Dependency-driven execution — `ExecutionPlan` · minimal subgraph (ADR-0017) | ✅ shipped |
+| v1.0-α3 | `BuildManifest` — the immutable receipt for one compilation | next |
 | v1.0-α4 | AI-backed pass implementations — behind `CompilerPass`, deterministic fallback | planned |
 | v1.0-α5 | Compiler replay — reconstruct execution from manifest + report + hashes | planned |
 | v1.0 | Public launch | planned |

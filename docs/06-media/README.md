@@ -20,6 +20,23 @@ integration, e2e) and a live run.
    "provider":"fake","model":"fake-1","tokens_in":11,"tokens_out":74,"latency_ms":0}
   ```
 
+## v1.0-α2 — Dependency-driven execution (the minimal subgraph)
+
+The compiler computes an `ExecutionPlan` from the dependency graph + cache *before* running, then
+executes only the implied work ([ADR-0017](../02-architecture/adr/0017-dependency-driven-execution.md)).
+**81 tests passing.**
+
+- **Minimal subgraph (captured, branched pipeline `A: title→x · B: idea→y · C: x→z`):**
+  ```
+  change idea   → required=[b]         reused=[a, c]   (only idea's branch runs)
+  change title  → required=[a, c]      reused=[b]      (change propagates to dependents)
+  no change     → required=[]          reused=[a, b, c]
+  ```
+- **Predictive & side-effect-free:** `Compiler.plan(seed)` peeks the cache (no hit/miss pollution) and
+  executes nothing — a real dry-run. The report stays historical; the plan is predictive.
+- **Sequential by choice:** topological order, no parallelism yet — deterministic, debuggable,
+  replayable. The graph already supports future parallelism.
+
 ## v1.0-α1 — Pass-output caching (activating the collected metadata)
 
 The compiler's bookkeeping becomes reuse ([ADR-0016](../02-architecture/adr/0016-pass-output-caching.md)):
