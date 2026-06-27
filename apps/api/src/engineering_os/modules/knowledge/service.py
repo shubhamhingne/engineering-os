@@ -20,6 +20,10 @@ TOPICS = [
 ]
 
 
+# Versioned so the schema can evolve (v2) without breaking existing renderers or projects.
+SCHEMA_VERSION = "v1"
+
+
 @dataclass
 class KnowledgeGraph:
     title: str
@@ -34,6 +38,7 @@ class KnowledgeGraph:
     risks: list[str] = field(default_factory=list)
     architecture: str = ""
     sources: dict[str, list[str]] = field(default_factory=dict)
+    schema_version: str = SCHEMA_VERSION
 
 
 def _sections(md: str) -> dict[str, str]:

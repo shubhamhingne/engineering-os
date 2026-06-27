@@ -6,7 +6,7 @@ const ITEMS: { type: string; label: string; enabled: boolean }[] = [
   { type: "vision", label: "Vision", enabled: true },
   { type: "prd", label: "PRD", enabled: true },
   { type: "readme", label: "README", enabled: true },
-  { type: "adr", label: "ADR", enabled: false },
+  { type: "adr", label: "ADR", enabled: true },
 ];
 
 // Data-driven typed artifact tree. Adding a type is a config line — scales to 20 (ADR-0004).

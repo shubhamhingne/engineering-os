@@ -41,6 +41,21 @@ which is itself one of the lessons. These are reflections, not achievements.
   each was wrong for the MVP. Reaching for sophistication before the simple version is proven is a
   common senior-engineer trap I had to actively resist.
 
+## Release retrospective — Alpha-0.5 (ADR generation)
+
+1. **What user problem did this solve?** A project's key decisions should be *recorded* (ADRs)
+   without the author hand-writing them — and recorded honestly, traceable to the artifacts.
+2. **What architectural decision made it possible?** The **`DecisionGraph`** and the
+   *structured-model → renderer* pattern ([ADR-0008](../02-architecture/adr/0008-decision-graph.md)):
+   `KnowledgeGraph → DecisionExtractor → DecisionGraph → ADR Renderer`. Same shape as the README —
+   the pattern is now the system's grammar.
+3. **What trade-off did I consciously accept?** I **versioned and typed the graphs now** (`v1`)
+   instead of shipping more features on an untyped dict — a deliberate refactor-before-feature that
+   trades speed today for safe schema evolution later.
+4. **If I rebuilt this in a year, what would I change?** Add an AI-assisted decision-extraction pass
+   behind the same renderer, render a multi-ADR index (not just the primary decision), and add
+   `graph.explain(entity)` for explainable provenance.
+
 ## Release retrospective — Alpha-0.4 (README synthesis)
 
 Every release answers four questions.

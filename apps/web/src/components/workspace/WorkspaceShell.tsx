@@ -63,13 +63,13 @@ export function WorkspaceShell({ projectId }: { projectId: string }) {
   }, [saved, ws.type, generating]);
 
   async function handleGenerate(type: ArtifactType = ws.type) {
-    // README is synthesized (deterministic), not streamed.
-    if (type === "readme") {
+    // README and ADR are synthesized (deterministic), not streamed.
+    if (type === "readme" || type === "adr") {
       setGenerating(true);
       setActionError(null);
       try {
-        await api.generateArtifact(projectId, "readme");
-        await ws.selectType("readme");
+        await api.generateArtifact(projectId, type);
+        await ws.selectType(type);
       } catch (e) {
         setActionError((e as Error).message);
       } finally {
@@ -130,6 +130,7 @@ export function WorkspaceShell({ projectId }: { projectId: string }) {
     { id: "gen-vision", label: "Generate Vision", group: "Actions", run: () => void handleGenerate("vision") },
     { id: "gen-prd", label: "Generate PRD", group: "Actions", run: () => void handleGenerate("prd") },
     { id: "gen-readme", label: "Generate README", group: "Actions", run: () => void handleGenerate("readme") },
+    { id: "gen-adr", label: "Generate ADR", group: "Actions", run: () => void handleGenerate("adr") },
     { id: "save", label: "Save artifact", group: "Actions", shortcut: "⌘S", enabled: dirty, run: () => void handleSave() },
     { id: "export", label: "Export project", group: "Actions", run: () => setExportMode(true) },
     { id: "open-vision", label: "Open Vision", group: "Artifacts", run: () => void ws.selectType("vision") },

@@ -12,6 +12,8 @@ from ...adapters.db.models import ArtifactVersion
 from ...modules.artifacts.service import ArtifactService
 from ...modules.generation.service import GenerationService
 from ...modules.projects.service import NotFoundError, ProjectService
+from ...modules.decision.service import ADRRenderer, DecisionExtractor
+from ...modules.knowledge.service import KnowledgeExtractor
 from ...modules.readme.service import ReadmeService
 from ...ports.ai_provider import AIProvider
 from .deps import get_db, get_provider
@@ -19,7 +21,7 @@ from .schemas import ArtifactSave, ArtifactVersionOut, ReadmeQualityOut, Version
 
 router = APIRouter(prefix="/api/v1")
 
-SUPPORTED_TYPES = {"vision", "prd", "readme"}
+SUPPORTED_TYPES = {"vision", "prd", "readme", "adr"}
 STREAMABLE_TYPES = {"vision", "prd"}  # README is synthesized (deterministic), not streamed
 
 
@@ -73,6 +75,15 @@ def generate_artifact(
             raise HTTPException(status_code=409, detail="generate the Vision before the README")
         content, _prov, _score, _missing = ReadmeService().synthesize(project.title, project.idea, present)
         return _out("readme", artifacts.add_version(project_id, "readme", content, "ai", "synthesis"))
+
+    # ADR is synthesized from the DecisionGraph (KnowledgeGraph → decisions → ADR).
+    if artifact_type == "adr":
+        present = _present_artifacts(artifacts, project_id)
+        if "vision" not in present:
+            raise HTTPException(status_code=409, detail="generate the Vision before the ADR")
+        graph = KnowledgeExtractor().extract(project.title, project.idea, present)
+        content = ADRRenderer().render_primary(DecisionExtractor().extract(graph))
+        return _out("adr", artifacts.add_version(project_id, "adr", content, "ai", "synthesis"))
 
     if artifact_type == "vision":
         context = {"idea": project.idea}

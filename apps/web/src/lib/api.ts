@@ -1,7 +1,7 @@
 // Thin API client. The browser never holds secrets; all calls hit the FastAPI backend.
 const BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
-export type ArtifactType = "vision" | "prd" | "readme";
+export type ArtifactType = "vision" | "prd" | "readme" | "adr";
 
 export type ReadmeQuality = { score: number; missing: string[]; provenance: Record<string, string[]> };
 

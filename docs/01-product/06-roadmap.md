@@ -67,8 +67,8 @@ Tracked as releases, not days — a real product roadmap.
 |---|---|---|
 | Alpha-0.3 | Core engine (workspace · streaming · export) | ✅ shipped |
 | Alpha-0.4 | README synthesis (KnowledgeGraph, ADR-0007) | ✅ shipped |
-| Alpha-0.5 | ADR generation | next |
-| Alpha-0.6 | GitHub integration (push) | planned |
+| Alpha-0.5 | ADR generation (DecisionGraph, ADR-0008) | ✅ shipped |
+| Alpha-0.6 | GitHub integration (push) | next |
 | Alpha-0.7 | Authentication | planned |
 | Alpha-0.8 | Cloud persistence | planned |
 | Alpha-0.9 | Collaboration | planned |

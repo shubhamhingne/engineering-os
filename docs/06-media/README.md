@@ -20,6 +20,16 @@ integration, e2e) and a live run.
    "provider":"fake","model":"fake-1","tokens_in":11,"tokens_out":74,"latency_ms":0}
   ```
 
+## Alpha-0.5 — ADR generation (DecisionGraph)
+
+ADRs synthesized through the same pattern as README — `KnowledgeGraph → DecisionExtractor →
+DecisionGraph → ADR Renderer` ([ADR-0008](../02-architecture/adr/0008-decision-graph.md)). Graphs are
+now **versioned + typed** (`schema_version: v1`). **28 tests passing.**
+
+- **Generated ADR (captured):** `# 0001 — Adopt the project technology stack` with Context · Decision ·
+  Alternatives · Consequences · **Provenance**.
+- **Semantic:** detected stack (e.g. FastAPI) appears in the Decision; provenance lists its sources.
+
 ## Day 14 / Alpha-0.4 — Intelligent README synthesis
 
 README **synthesized from a KnowledgeGraph** ([ADR-0007](../02-architecture/adr/0007-knowledge-synthesis.md)),
