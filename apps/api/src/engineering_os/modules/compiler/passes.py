@@ -263,7 +263,8 @@ class Compiler:
         for p in self._passes:
             d = p.descriptor
             if any(producer.get(c.name) in required_set for c in d.consumes):
-                required.append(d.id); required_set.add(d.id)
+                required.append(d.id)
+                required_set.add(d.id)
                 reasons[d.id] = "required: an upstream pass re-executes"
                 continue
             cached = None
@@ -275,7 +276,8 @@ class Compiler:
                 for slot, value in cached.items():
                     ctx.set(slot, value)
             else:
-                required.append(d.id); required_set.add(d.id)
+                required.append(d.id)
+                required_set.add(d.id)
                 reasons[d.id] = (
                     "required: pass is not cacheable (observes live state)"
                     if not d.cacheable else "required: output not in cache"

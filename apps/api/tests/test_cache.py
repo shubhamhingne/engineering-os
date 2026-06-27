@@ -4,7 +4,6 @@ runs stay cache-less and deterministic."""
 from engineering_os.adapters.repository.github import FakeRepositoryReader
 from engineering_os.modules.compiler.cache import InMemoryPassCache
 from engineering_os.modules.compiler.passes import (
-    BUNDLE,
     EXPLAIN_PIPELINE,
     IDEA,
     SOURCES,

@@ -36,6 +36,12 @@ New ADRs use the
 Captured in the case study: [design decisions](../04-case-study/03-design-decisions.md) ·
 [trade-offs](../04-case-study/04-trade-offs.md) · [failure log](../04-case-study/05-failure-log.md).
 
+## Beta readiness
+
+Post-v1.0, the feature set is frozen and work shifts to beta hardening. Findings from the
+Staff-Engineer readiness audit are tracked in the
+[beta-readiness register](beta-readiness-register.md) (`BR-*`).
+
 ## Design decisions
 
 Captured in the design system: [principles](../03-design-system/01-design-principles.md) and the
