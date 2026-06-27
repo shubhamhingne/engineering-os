@@ -20,6 +20,17 @@ integration, e2e) and a live run.
    "provider":"fake","model":"fake-1","tokens_in":11,"tokens_out":74,"latency_ms":0}
   ```
 
+## Alpha-0.6.x — Incremental build pipeline (planner · hashing · diff)
+
+The compiler gained planning + change detection ([ADR-0010](../02-architecture/adr/0010-build-planner-diff.md)):
+`Knowledge → BuildPlanner → Renderers → Bundle → DiffEngine → Publishers`. **40 tests passing.**
+
+- **Build plan (captured):** `readme ✓ · adr ✓ · docs ✓ · scaffold ✓ · openapi · skip (no API spec) ·
+  diagrams · skip (missing architecture)` — conditional, with reasons.
+- **Every artifact is hashed**; the diff engine reports `added / changed / unchanged / removed`.
+- **Incremental:** after an export, re-diffing shows *all unchanged* until something actually changes —
+  the system knows exactly what would need re-publishing.
+
 ## Alpha-0.6 — Semantic build system (renderers + publishers)
 
 Export refactored into **renderers** (produce an explicit `ArtifactBundle`) and **publishers**

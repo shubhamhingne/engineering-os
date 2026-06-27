@@ -9,8 +9,16 @@ from sqlalchemy.orm import Session
 from ...modules.export.service import ExportService
 from ...modules.projects.service import NotFoundError, ProjectService
 from ...modules.publish.publishers import GitHubPublisher
+from ...modules.render.diff import DiffEngine
 from .deps import get_db, get_github_client
-from .schemas import ExportJobOut, PublishRequest, PublishResultOut
+from .schemas import (
+    BuildPlanItemOut,
+    BuildPlanOut,
+    BundleDiffOut,
+    ExportJobOut,
+    PublishRequest,
+    PublishResultOut,
+)
 
 router = APIRouter(prefix="/api/v1")
 
@@ -39,6 +47,30 @@ def export_stream(project_id: str, db: Session = Depends(get_db)) -> StreamingRe
             yield _sse("error", {"detail": str(exc)})
 
     return StreamingResponse(event_stream(), media_type="text/event-stream")
+
+
+@router.get("/projects/{project_id}/build-plan", response_model=BuildPlanOut)
+def build_plan(project_id: str, db: Session = Depends(get_db)) -> BuildPlanOut:
+    _require_project(db, project_id)
+    plan = ExportService(db).plan(project_id)
+    return BuildPlanOut(
+        items=[BuildPlanItemOut(renderer=i.renderer, build=i.build, reason=i.reason) for i in plan.items]
+    )
+
+
+@router.get("/projects/{project_id}/export/diff", response_model=BundleDiffOut)
+def export_diff(project_id: str, db: Session = Depends(get_db)) -> BundleDiffOut:
+    _require_project(db, project_id)
+    service = ExportService(db)
+    bundle, _project, _count = service.build_bundle(project_id)
+    diff = DiffEngine().diff(service.previous_files(project_id), bundle)
+    return BundleDiffOut(
+        added=diff.added,
+        changed=diff.changed,
+        unchanged=diff.unchanged,
+        removed=diff.removed,
+        has_changes=diff.has_changes(),
+    )
 
 
 @router.get("/projects/{project_id}/exports", response_model=list[ExportJobOut])

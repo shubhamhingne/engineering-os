@@ -65,3 +65,21 @@ class ExportJobOut(BaseModel):
     size_bytes: int
     artifact_count: int
     created_at: datetime
+
+
+class BuildPlanItemOut(BaseModel):
+    renderer: str
+    build: bool
+    reason: str
+
+
+class BuildPlanOut(BaseModel):
+    items: list[BuildPlanItemOut]
+
+
+class BundleDiffOut(BaseModel):
+    added: list[str]
+    changed: list[str]
+    unchanged: list[str]
+    removed: list[str]
+    has_changes: bool

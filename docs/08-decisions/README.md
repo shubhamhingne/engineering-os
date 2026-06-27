@@ -17,6 +17,7 @@ their own docs and linked here.
 | [0007](../02-architecture/adr/0007-knowledge-synthesis.md) | KnowledgeGraph synthesis + three-layer AI provenance |
 | [0008](../02-architecture/adr/0008-decision-graph.md) | DecisionGraph + structured-model → renderer pattern |
 | [0009](../02-architecture/adr/0009-semantic-build-system.md) | Semantic build system: renderers · bundle · publishers |
+| [0010](../02-architecture/adr/0010-build-planner-diff.md) | Build planner, artifact hashing, and diff engine |
 
 New ADRs use the
 [template](https://github.com/shubhamhingne/.github/blob/main/docs/adr/0000-template.md).

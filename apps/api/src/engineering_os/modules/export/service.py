@@ -14,8 +14,10 @@ from sqlalchemy.orm import Session
 
 from ...adapters.db.models import ExportJob, Project
 from ..artifacts.service import ArtifactService
+from ..knowledge.service import KnowledgeExtractor
 from ..projects.service import NotFoundError
 from ..publish.publishers import ZipPublisher
+from ..render.planner import BuildPlan, BuildPlanner
 from ..render.renderers import ArtifactBundle, RenderContext, RendererRegistry
 
 log = logging.getLogger("eos.export")
@@ -38,13 +40,33 @@ class ExportService:
                 present[t] = current.content
         return present
 
+    def plan(self, project_id: str) -> BuildPlan:
+        project = self._db.get(Project, project_id)
+        if project is None:
+            raise NotFoundError(project_id)
+        present = self._present(project_id)
+        graph = KnowledgeExtractor().extract(project.title, project.idea, present)
+        return BuildPlanner().plan(graph, present)
+
     def build_bundle(self, project_id: str) -> tuple[ArtifactBundle, Project, int]:
         project = self._db.get(Project, project_id)
         if project is None:
             raise NotFoundError(project_id)
         present = self._present(project_id)
         ctx = RenderContext(title=project.title, idea=project.idea, artifacts=present)
-        return RendererRegistry().build(ctx), project, len(present)
+        graph = KnowledgeExtractor().extract(project.title, project.idea, present)
+        plan = BuildPlanner().plan(graph, present)
+        # Only render what the plan says to build (incremental / conditional generation).
+        bundle = RendererRegistry().build(ctx, only=plan.to_build())
+        return bundle, project, len(present)
+
+    def previous_files(self, project_id: str) -> dict[str, str]:
+        """Files from the most recent export — the baseline for a diff."""
+        jobs = self.history(project_id)
+        if not jobs:
+            return {}
+        with zipfile.ZipFile(io.BytesIO(jobs[0].zip_data)) as zf:
+            return {name: zf.read(name).decode("utf-8") for name in zf.namelist()}
 
     def run_stream(self, project_id: str) -> Iterator[tuple[str, dict]]:
         yield ("phase", {"phase": "queued"})

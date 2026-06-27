@@ -69,7 +69,8 @@ Tracked as releases, not days — a real product roadmap.
 | Alpha-0.4 | README synthesis (KnowledgeGraph, ADR-0007) | ✅ shipped |
 | Alpha-0.5 | ADR generation (DecisionGraph, ADR-0008) | ✅ shipped |
 | Alpha-0.6 | Semantic build system + GitHub publisher (ADR-0009) | ✅ shipped |
-| Alpha-0.7 | Authentication (+ GitHub OAuth for real push) | next |
+| Alpha-0.6.x | Incremental build pipeline — planner · hashing · diff (ADR-0010) | ✅ shipped |
+| Alpha-0.7 | Identity · Authorization · Federation (GitHub OAuth) | next |
 | Alpha-0.8 | Cloud persistence | planned |
 | Alpha-0.9 | Collaboration | planned |
 | v1.0 | Public launch | planned |

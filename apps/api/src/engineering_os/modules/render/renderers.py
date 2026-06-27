@@ -2,6 +2,7 @@
 produces explicit Artifact[] (path + content + provenance). Renderers answer *what files should
 exist*; Publishers (separately) answer *where they go* (ADR-0009).
 """
+import hashlib
 from dataclasses import dataclass, field
 from typing import Optional, Protocol
 
@@ -20,6 +21,12 @@ class RenderedArtifact:
     content: str
     renderer: str
     provenance: dict[str, list[str]] = field(default_factory=dict)
+    generated_at: Optional[str] = None
+    hash: str = ""                  # content hash → enables diffing / incremental builds
+
+    def __post_init__(self) -> None:
+        if not self.hash:
+            self.hash = hashlib.sha256(self.content.encode("utf-8")).hexdigest()[:12]
 
 
 @dataclass
@@ -96,8 +103,13 @@ class RendererRegistry:
             ScaffoldRenderer(),
         ]
 
-    def build(self, ctx: RenderContext) -> ArtifactBundle:
+    def build(self, ctx: RenderContext, only: Optional[set[str]] = None) -> ArtifactBundle:
         bundle = ArtifactBundle()
         for renderer in self._renderers:
+            if only is not None and renderer.name not in only:
+                continue
             bundle.artifacts.extend(renderer.render(ctx))
         return bundle
+
+    def renderer_names(self) -> list[str]:
+        return [r.name for r in self._renderers]

@@ -41,6 +41,21 @@ which is itself one of the lessons. These are reflections, not achievements.
   each was wrong for the MVP. Reaching for sophistication before the simple version is proven is a
   common senior-engineer trap I had to actively resist.
 
+## Release retrospective — Alpha-0.6.x (incremental build pipeline)
+
+1. **What user problem did this solve?** Not re-doing work that didn't change — and being able to
+   say precisely *what* changed since the last export/publish (the basis for fast, trustworthy sync).
+2. **What architectural decision made it possible?** Adding the compiler's planning + change phases:
+   artifact **hashing**, a **`BuildPlanner`** (conditional generation with reasons), and a
+   **`DiffEngine`** ([ADR-0010](../02-architecture/adr/0010-build-planner-diff.md)). The pipeline is now
+   `Knowledge → Planner → Renderers → Bundle → Diff → Publishers`.
+3. **What trade-off did I consciously accept?** Rule-based planning (not cost/priority-aware) and a
+   simple content hash — enough to unlock incremental builds now, with room to grow, rather than
+   over-engineering a build graph before it's needed.
+4. **If I rebuilt this in a year, what would I change?** Add `RepositoryState` (per-artifact published
+   hashes + commit SHA) so the diff runs against the *remote*, and have publishers consume the diff to
+   push only changed files — turning GitHub publish into true synchronization.
+
 ## Release retrospective — Alpha-0.6 (semantic build system + GitHub)
 
 1. **What user problem did this solve?** Getting a synthesized project *out* of the tool — as a
