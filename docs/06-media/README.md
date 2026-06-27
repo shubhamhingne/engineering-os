@@ -20,6 +20,21 @@ integration, e2e) and a live run.
    "provider":"fake","model":"fake-1","tokens_in":11,"tokens_out":74,"latency_ms":0}
   ```
 
+## v1.0-α4 — Compiler hardening (property-based invariant testing)
+
+The invariants are now demonstrated over randomly generated pipelines, not just examples
+([ADR-0019](../02-architecture/adr/0019-compiler-hardening.md)). Hypothesis + a synthetic-pipeline
+generator. **95 tests passing** (8 property/adversarial families).
+
+- **Properties proven across generated DAGs:** valid pipeline → validates · executes · serializes
+  stably; back edge → always rejected at startup; **dependency pruning == forward closure of the
+  changed input**; cache reuse reproduces every output; fingerprint stable then version-sensitive;
+  manifest hash execution-independent (cold == warm).
+- **Replay identity:** rebuilding from the same inputs reproduces the manifest — the receipt is
+  sufficient to identify the build.
+- **Invariants reorganized into categories** (Compiler · Artifacts · Execution · Identity), with the
+  property-tested ones marked — they have become part of the architecture.
+
 ## v1.0-α3 — BuildManifest (the immutable identity of a compilation)
 
 A tiny, content-addressed receipt that references the immutable products rather than duplicating them

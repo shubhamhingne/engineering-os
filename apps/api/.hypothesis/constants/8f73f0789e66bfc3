@@ -1,0 +1,4 @@
+# file: /Users/shubham.hignevidushiinfotech.com/Shubham_p/Development/products/engineering-os/apps/api/src/engineering_os/interface/http/auth.py
+# hypothesis_version: 6.141.1
+
+[307, 400, 600, '/', '/api/v1/auth', '/github/callback', '/github/login', '/logout', '/me', 'eos_oauth_state', 'invalid OAuth state', 'lax', 'logged out', 'status']

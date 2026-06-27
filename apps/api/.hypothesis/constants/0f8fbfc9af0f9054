@@ -1,0 +1,4 @@
+# file: /Users/shubham.hignevidushiinfotech.com/Shubham_p/Development/products/engineering-os/apps/api/src/engineering_os/observability.py
+# hypothesis_version: 6.141.1
+
+['artifact_type', 'latency_ms', 'level', 'logger', 'model', 'msg', 'provider', 'source', 'tokens_in', 'tokens_out', 'version_no']

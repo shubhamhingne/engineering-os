@@ -1,0 +1,4 @@
+# file: /Users/shubham.hignevidushiinfotech.com/Shubham_p/Development/products/engineering-os/apps/api/src/engineering_os/config.py
+# hypothesis_version: 6.141.1
+
+['.env', 'claude-sonnet-4-6', 'eos_session', 'fake', 'ignore']

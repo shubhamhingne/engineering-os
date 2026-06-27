@@ -1,0 +1,4 @@
+# file: /Users/shubham.hignevidushiinfotech.com/Shubham_p/Development/products/engineering-os/apps/api/src/engineering_os/modules/export/service.py
+# hypothesis_version: 6.141.1
+
+[1000, '-', 'README.md', '[^a-z0-9]+', 'artifact_count', 'completed', 'done', 'eos.export', 'export.completed', 'filename', 'generating', 'job_id', 'latency_ms', 'packaging', 'phase', 'preparing', 'project', 'queued', 'size_bytes', 'utf-8', 'verifying']

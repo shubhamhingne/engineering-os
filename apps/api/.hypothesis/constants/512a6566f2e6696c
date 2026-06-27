@@ -1,0 +1,4 @@
+# file: /Users/shubham.hignevidushiinfotech.com/Shubham_p/Development/products/engineering-os/apps/api/src/engineering_os/adapters/db/models.py
+# hypothesis_version: 6.141.1
+
+[120, 160, 200, 255, 400, 'Artifact', 'ArtifactVersion', 'ExportJob', 'adr', 'all, delete-orphan', 'artifact', 'artifact_versions', 'artifacts', 'artifacts.id', 'export_jobs', 'prd', 'project', 'project_id', 'projects', 'projects.id', 'readme', 'type', 'user_sessions', 'users', 'users.id', 'versions', 'vision']

@@ -41,6 +41,25 @@ which is itself one of the lessons. These are reflections, not achievements.
   each was wrong for the MVP. Reaching for sophistication before the simple version is proven is a
   common senior-engineer trap I had to actively resist.
 
+## Release retrospective — v1.0-α4 (compiler hardening)
+
+1. **What user problem did this solve?** Trust in the engine, proven rather than asserted. The
+   invariants are now demonstrated over *randomly generated* pipelines, not a handful of examples —
+   the line between a prototype and a compiler.
+2. **What architectural decision made it possible?** Adding Hypothesis and a synthetic-pipeline
+   generator, then expressing the guarantees as properties: DAG correctness, cycle rejection,
+   manifest semantic identity, fingerprint stability/sensitivity, cache correctness, and — the
+   strongest — dependency pruning equals the forward closure of the changed input
+   ([ADR-0019](../02-architecture/adr/0019-compiler-hardening.md)). Plus a replay-identity test: the
+   receipt is sufficient to reproduce the build's identity.
+3. **What trade-off did I consciously accept?** A release with no new feature, and synthetic `str`
+   slots instead of real graphs — the properties exercise the *machinery* (validation, caching,
+   pruning, identity) while the example tests keep covering semantics. Worth it: the machinery is
+   exactly what must not break.
+4. **If I rebuilt this in a year, what would I change?** I'd reach for property tests sooner. Once a
+   system has this many invariants, enumerating examples is weaker than describing the space and
+   letting a generator attack it.
+
 ## Release retrospective — v1.0-α3 (the BuildManifest)
 
 1. **What user problem did this solve?** A stable answer to "exactly what compilation are we talking

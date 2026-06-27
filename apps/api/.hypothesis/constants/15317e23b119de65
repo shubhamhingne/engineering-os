@@ -1,0 +1,4 @@
+# file: /Users/shubham.hignevidushiinfotech.com/Shubham_p/Development/products/engineering-os/apps/api/src/engineering_os/adapters/repository/github.py
+# hypothesis_version: 6.141.1
+
+[10.0, 404, '1', 'Accept', 'Authorization', 'blob', 'content', 'default_branch', 'main', 'path', 'recursive', 'sha', 'tree', 'type']

@@ -1,0 +1,4 @@
+# file: /Users/shubham.hignevidushiinfotech.com/Shubham_p/Development/products/engineering-os/apps/api/src/engineering_os/interface/http/exports.py
+# hypothesis_version: 6.141.1
+
+[400, 404, '/api/v1', 'Content-Disposition', 'application/zip', 'detail', 'error', 'export not found', 'text/event-stream']

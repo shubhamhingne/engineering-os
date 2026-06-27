@@ -1,0 +1,4 @@
+# file: /Users/shubham.hignevidushiinfotech.com/Shubham_p/Development/products/engineering-os/apps/api/src/engineering_os/interface/http/projects.py
+# hypothesis_version: 6.141.1
+
+[201, '/api/v1', '/projects']
