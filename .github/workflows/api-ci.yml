@@ -1,18 +1,20 @@
 name: api-ci
 on:
   push: { branches: [main], paths: ["apps/api/**", ".github/workflows/api-ci.yml"] }
-  pull_request: { paths: ["apps/api/**"] }
+  pull_request: { paths: ["apps/api/**", ".github/workflows/api-ci.yml"] }
 permissions: { contents: read }
 concurrency: { group: api-ci-${{ github.ref }}, cancel-in-progress: true }
 jobs:
   build:
-    name: Lint · Type · Test
+    name: Lint · Test
     runs-on: ubuntu-latest
     defaults: { run: { working-directory: apps/api } }
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with: { python-version: "3.12" }
-      - run: pip install -e ".[dev]" || echo "no project yet (skeleton)"
-      - run: ruff check . || true
-      - run: pytest -q || true
+      # No `|| true`: a green check now means lint and tests genuinely pass (BR-01).
+      - run: pip install -e ".[dev]"
+      - run: ruff check .
+      - run: pytest -q
+      # `ruff format --check` is added after the one-time repo reformat (see BR-01 note).
