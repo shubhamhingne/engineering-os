@@ -1,23 +1,41 @@
-"""Explainability — the ExplanationGraph compiler output + the pass pipeline."""
+"""Explainability + the typed compiler (ADR-0011, ADR-0013). The ExplanationGraph is one output;
+the CompilerContext symbol table, the startup validator, and the CompilationReport are the
+machinery that produces it — provable, observable, and well-formed before it runs."""
 import pytest
 
+from engineering_os.modules.compiler.context import ContextKey
 from engineering_os.modules.compiler.passes import (
+    EXPLANATIONS,
     EXPLAIN_PIPELINE,
+    Compiler,
+    ExtractDecisionPass,
     ExtractKnowledgePass,
-    PassRunner,
+    PipelineValidationError,
+    compile_project,
     run_explain_pipeline,
 )
 
 
-def test_every_pass_declares_the_full_contract():
+def test_every_pass_declares_a_typed_descriptor():
     for p in EXPLAIN_PIPELINE:
-        assert isinstance(p.name, str) and p.name
-        assert isinstance(p.consumes, list) and isinstance(p.produces, list)
-        assert isinstance(p.deterministic, bool)
-        assert isinstance(p.cacheable, bool)  # distinct from deterministic — keyed on by pass caching
-        # a cacheable pass must be deterministic (you can't safely memoize a non-deterministic output)
-        if p.cacheable:
-            assert p.deterministic
+        d = p.descriptor
+        assert isinstance(d.id, str) and d.id
+        assert all(isinstance(k, ContextKey) for k in d.consumes)
+        assert all(isinstance(k, ContextKey) for k in d.produces)
+        assert isinstance(d.deterministic, bool) and isinstance(d.cacheable, bool)
+        if d.cacheable:  # you can't safely memoize a non-deterministic output
+            assert d.deterministic
+
+
+def test_validator_rejects_missing_producer():
+    # extract_decision consumes `knowledge`, which nothing earlier produces.
+    with pytest.raises(PipelineValidationError):
+        Compiler((ExtractDecisionPass(),))
+
+
+def test_validator_rejects_duplicate_producer():
+    with pytest.raises(PipelineValidationError):
+        Compiler((ExtractKnowledgePass(), ExtractKnowledgePass()))
 
 
 def test_explain_pipeline_produces_explanations_with_provenance():
@@ -36,9 +54,23 @@ def test_explain_pipeline_produces_explanations_with_provenance():
     assert any(p.endswith(".md") for p in auth.appears_in)  # provenance: produced artifacts
 
 
-def test_pass_runner_validates_required_inputs():
-    with pytest.raises(ValueError):
-        PassRunner().run([ExtractKnowledgePass()], {})  # missing title/idea/sources
+def test_compiler_records_an_execution_trace_and_report():
+    result = compile_project(
+        "App", "a FastAPI app with authentication", {"vision": "# V\n\n## Problem\nneeds authentication\n"}
+    )
+    report = result.report
+    assert [p.pass_id for p in report.passes_executed] == [
+        "extract_knowledge",
+        "extract_decision",
+        "build",
+        "explain",
+    ]
+    assert report.artifacts_generated > 0
+    # the report is versioned by every graph it touched (the build log of a semantic compile)
+    assert report.schema_versions["knowledge"] == "v1"
+    assert report.schema_versions["explanations"] == "v1"
+    # the explanations are still reachable as a typed slot in the symbol table
+    assert result.context.get(EXPLANATIONS).explanations
 
 
 def test_explanations_endpoint(client):
@@ -51,3 +83,20 @@ def test_explanations_endpoint(client):
     assert "topic:authentication" in ids and "tech:FastAPI" in ids
     auth = next(e for e in data if e["entity_id"] == "topic:authentication")
     assert auth["confidence"] > 0 and auth["appears_in"]
+
+
+def test_compilation_report_endpoint(client):
+    pid = client.post(
+        "/api/v1/projects", json={"title": "App", "idea": "a FastAPI app with authentication"}
+    ).json()["id"]
+    client.post(f"/api/v1/projects/{pid}/artifacts/vision")
+    report = client.get(f"/api/v1/projects/{pid}/compilation-report").json()
+    assert report["compiler_version"]
+    assert [p["pass_id"] for p in report["passes_executed"]] == [
+        "extract_knowledge",
+        "extract_decision",
+        "build",
+        "explain",
+    ]
+    assert report["artifacts_generated"] > 0
+    assert report["schema_versions"]["explanations"] == "v1"

@@ -20,6 +20,7 @@ their own docs and linked here.
 | [0010](../02-architecture/adr/0010-build-planner-diff.md) | Build planner, artifact hashing, and diff engine |
 | [0011](../02-architecture/adr/0011-explainability-compiler-passes.md) | Explainability as a compiler output + the CompilerPass contract |
 | [0012](../02-architecture/adr/0012-identity-federation-boundary.md) | Identity, GitHub federation, and the compiler boundary (CredentialProvider) |
+| [0013](../02-architecture/adr/0013-typed-compiler-context.md) | Typed CompilerContext — symbol table, startup validator, CompilationReport |
 
 New ADRs use the
 [template](https://github.com/shubhamhingne/.github/blob/main/docs/adr/0000-template.md).

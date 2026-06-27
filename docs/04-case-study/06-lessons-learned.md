@@ -41,6 +41,24 @@ which is itself one of the lessons. These are reflections, not achievements.
   each was wrong for the MVP. Reaching for sophistication before the simple version is proven is a
   common senior-engineer trap I had to actively resist.
 
+## Release retrospective — Alpha-0.8.x (the typed compiler)
+
+1. **What user problem did this solve?** Indirectly but importantly: trust in the engine. The
+   compiler can now prove its own pipeline is well-formed *before* running, and every compile emits a
+   build log (`GET /compilation-report`) — which passes ran, what they produced, how long they took.
+2. **What architectural decision made it possible?** Treating the context not as a typed bag but as
+   the compiler's **symbol table**: typed `ContextKey` slots, a `PassDescriptor` per pass, a startup
+   validator that proves "every consumed slot has a producer, types match, no duplicates," and a
+   `CompilationReport` ([ADR-0013](../02-architecture/adr/0013-typed-compiler-context.md)). An
+   ill-formed pipeline now fails at construction, not three passes deep.
+3. **What trade-off did I consciously accept?** More machinery around a still-*sequential* pipeline,
+   and report fields (`cache_hit`, `artifacts_reused`, `commit_sha`) that are present but inert until
+   caching and RepositoryState land. I accepted both to keep the report shape stable and to make the
+   eventual DAG scheduler a no-op for pass authors — the executor already reads only descriptors.
+4. **If I rebuilt this in a year, what would I change?** Nothing structural — this is the home the
+   project's invariants needed. I'd only have reached for it one release sooner, before the dict
+   context had a chance to ossify.
+
 ## Release retrospective — Alpha-0.8 (identity, federation, and the boundary)
 
 1. **What user problem did this solve?** Proving who you are and that you're allowed to publish.

@@ -20,6 +20,27 @@ integration, e2e) and a live run.
    "provider":"fake","model":"fake-1","tokens_in":11,"tokens_out":74,"latency_ms":0}
   ```
 
+## Alpha-0.8.x — The typed compiler (symbol table · validator · build log)
+
+The `dict` context became the compiler's **symbol table**: typed `ContextKey` slots, a
+`PassDescriptor` per pass, a startup validator, and a generated `CompilationReport`
+([ADR-0013](../02-architecture/adr/0013-typed-compiler-context.md)). **57 tests passing.**
+
+- **Startup validation (captured):** an ill-formed pipeline never runs —
+  `Compiler((ExtractDecisionPass(),))` ⇒ *"pass 'extract_decision' consumes 'knowledge' but no
+  earlier pass produces it"*; two knowledge passes ⇒ *"duplicate producer"*.
+- **Build log (`GET /projects/{id}/compilation-report`, captured):**
+  ```
+  compiler_version: 0.8.x
+  extract_knowledge   in=[title, idea, sources]            out=[knowledge]     cache_hit=False
+  extract_decision    in=[knowledge]                       out=[decisions]     cache_hit=False
+  build               in=[title, idea, sources]            out=[bundle]        cache_hit=False
+  explain             in=[knowledge, decisions, sources, bundle]  out=[explanations]  cache_hit=False
+  artifacts_generated: 6 | schema_versions: {knowledge: v1, decisions: v1, bundle: v1, explanations: v1}
+  ```
+- **Forward-compatible:** the executor reads only descriptors, so the future DAG scheduler
+  (`build_dependency_graph → topological_sort → run`) changes no pass.
+
 ## Alpha-0.8 — Identity, federation, and the compiler boundary
 
 GitHub OAuth, sessions, and project ownership — added as application-layer services that **wrap** the

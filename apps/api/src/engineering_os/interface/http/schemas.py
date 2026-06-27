@@ -86,6 +86,28 @@ class ExplanationOut(BaseModel):
     confidence: float
 
 
+class PassResultOut(BaseModel):
+    pass_id: str
+    duration_ms: int
+    cache_hit: bool
+    inputs: list[str]
+    outputs: list[str]
+    warnings: list[str]
+    errors: list[str]
+
+
+class CompilationReportOut(BaseModel):
+    compiler_version: str
+    schema_versions: dict[str, str]
+    passes_executed: list[PassResultOut]
+    artifacts_generated: int
+    artifacts_reused: int
+    cache_hits: int
+    warnings: list[str]
+    duration_ms: int
+    commit_sha: Optional[str] = None
+
+
 class BuildPlanItemOut(BaseModel):
     renderer: str
     build: bool
