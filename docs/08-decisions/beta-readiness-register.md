@@ -13,8 +13,8 @@ around them is the remaining work.
 
 | ID | Finding | Type | Impact | Likelihood | Priority | Status | Target | Resolved in |
 |---|---|---|---|---|---|---|---|---|
-| BR-01 | CI runs `ruff`/`pytest` with `\|\| true` — never gates | Reliability | High | High | **Critical** | Open | Beta-0.1 | — |
-| BR-02 | GitHub OAuth tokens stored plaintext at rest | Security | High | High | **Critical** | Open | Beta-0.1 | — |
+| BR-01 | CI runs `ruff`/`pytest` with `\|\| true` — never gates | Reliability | High | High | **Critical** | ✅ Resolved | Beta-0.1 | `4b79eb4` · alpha-0.3.1 · 2026-06-27 |
+| BR-02 | GitHub OAuth tokens stored plaintext at rest | Security | High | High | **Critical** | ✅ Resolved | Beta-0.1 | `8c3e986` · alpha-0.3.1 · 2026-06-27 |
 | BR-03 | No application Dockerfile / reproducible deploy path | Reliability | High | High | High | Open | Beta-0.2 | — |
 | BR-04 | No DB migrations (`create_all`, no Alembic) | Reliability | High | Medium | High | Open | Beta-0.2 | — |
 | BR-05 | No rate limiting on AI / OAuth endpoints | Security | High | Medium | High | Open | Beta-0.2 | — |
@@ -56,7 +56,7 @@ specification/invariants/history; and a compiler boundary that keeps secrets out
 
 ## Sprints (hardening, not features)
 
-1. **Trust (Critical):** BR-01, BR-02 → tag `alpha-0.3.1`.
+1. **Trust (Critical):** BR-01, BR-02 → ✅ **shipped in `alpha-0.3.1`.**
 2. **Deployability:** BR-03, BR-04, BR-05, BR-06, BR-07.
 3. **Operability:** BR-08, BR-10, BR-12, BR-14.
 4. **Developer experience:** BR-11, frontend smoke (BR-09).
