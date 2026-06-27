@@ -16,6 +16,7 @@ their own docs and linked here.
 | [0006](../02-architecture/adr/0006-export-pipeline.md) | Export as an observable pipeline (ExportJob) |
 | [0007](../02-architecture/adr/0007-knowledge-synthesis.md) | KnowledgeGraph synthesis + three-layer AI provenance |
 | [0008](../02-architecture/adr/0008-decision-graph.md) | DecisionGraph + structured-model → renderer pattern |
+| [0009](../02-architecture/adr/0009-semantic-build-system.md) | Semantic build system: renderers · bundle · publishers |
 
 New ADRs use the
 [template](https://github.com/shubhamhingne/.github/blob/main/docs/adr/0000-template.md).

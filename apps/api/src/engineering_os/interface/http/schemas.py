@@ -45,6 +45,19 @@ class ReadmeQualityOut(BaseModel):
     provenance: dict[str, list[str]]
 
 
+class PublishRequest(BaseModel):
+    repo_name: str = Field(min_length=1, max_length=100)
+    private: bool = False
+
+
+class PublishResultOut(BaseModel):
+    target: str
+    url: Optional[str] = None
+    commit_sha: Optional[str] = None
+    size_bytes: int
+    artifact_count: int
+
+
 class ExportJobOut(BaseModel):
     id: str
     status: str

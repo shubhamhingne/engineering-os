@@ -23,3 +23,12 @@ def get_provider() -> AIProvider:
 
         return AnthropicProvider(settings.anthropic_api_key, settings.ai_model)
     return FakeAIProvider()
+
+
+def get_github_client():
+    """The real GitHub client when a token is configured; otherwise None (tests inject a fake)."""
+    if settings.github_token:
+        from ...modules.publish.github import RealGitHubClient
+
+        return RealGitHubClient(settings.github_token)
+    return None

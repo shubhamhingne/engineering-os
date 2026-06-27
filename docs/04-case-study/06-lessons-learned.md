@@ -41,6 +41,22 @@ which is itself one of the lessons. These are reflections, not achievements.
   each was wrong for the MVP. Reaching for sophistication before the simple version is proven is a
   common senior-engineer trap I had to actively resist.
 
+## Release retrospective — Alpha-0.6 (semantic build system + GitHub)
+
+1. **What user problem did this solve?** Getting a synthesized project *out* of the tool — as a
+   ZIP today and a real GitHub repo next — without the output format dictating the architecture.
+2. **What architectural decision made it possible?** Separating **renderers** (what files exist →
+   an explicit `ArtifactBundle`) from **publishers** (where they go: ZIP, GitHub) with a
+   `RendererRegistry` ([ADR-0009](../02-architecture/adr/0009-semantic-build-system.md)). The system
+   is now a *semantic build system*: knowledge → compiler → artifacts → publishers.
+3. **What trade-off did I consciously accept?** More abstraction (bundle + registry + publisher
+   ports) than a single export function, and the real GitHub push gated on a token until OAuth lands
+   — proven now via a fake client. I traded immediate end-to-end push for a clean seam that won't
+   leak publishing logic into rendering as destinations multiply.
+4. **If I rebuilt this in a year, what would I change?** Add artifact `hash`/`generatedAt` for
+   diffing + **incremental regeneration** (only re-render what changed), and treat GitHub as
+   *synchronization* — store the commit SHA on the graph so the system knows exactly what shipped.
+
 ## Release retrospective — Alpha-0.5 (ADR generation)
 
 1. **What user problem did this solve?** A project's key decisions should be *recorded* (ADRs)

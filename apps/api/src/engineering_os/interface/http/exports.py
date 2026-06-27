@@ -8,8 +8,9 @@ from sqlalchemy.orm import Session
 
 from ...modules.export.service import ExportService
 from ...modules.projects.service import NotFoundError, ProjectService
-from .deps import get_db
-from .schemas import ExportJobOut
+from ...modules.publish.publishers import GitHubPublisher
+from .deps import get_db, get_github_client
+from .schemas import ExportJobOut, PublishRequest, PublishResultOut
 
 router = APIRouter(prefix="/api/v1")
 
@@ -54,6 +55,27 @@ def list_exports(project_id: str, db: Session = Depends(get_db)) -> list[ExportJ
         )
         for j in ExportService(db).history(project_id)
     ]
+
+
+@router.post("/projects/{project_id}/publish/github", response_model=PublishResultOut)
+def publish_github(
+    project_id: str,
+    body: PublishRequest,
+    db: Session = Depends(get_db),
+    client=Depends(get_github_client),
+) -> PublishResultOut:
+    _require_project(db, project_id)
+    if client is None:
+        raise HTTPException(status_code=400, detail="GitHub is not configured (token required)")
+    bundle, _project, _count = ExportService(db).build_bundle(project_id)
+    result = GitHubPublisher(client).publish(body.repo_name, bundle, body.private)
+    return PublishResultOut(
+        target=result.target,
+        url=result.url,
+        commit_sha=result.commit_sha,
+        size_bytes=result.size_bytes,
+        artifact_count=result.artifact_count,
+    )
 
 
 @router.get("/exports/{job_id}/download")

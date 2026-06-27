@@ -20,6 +20,19 @@ integration, e2e) and a live run.
    "provider":"fake","model":"fake-1","tokens_in":11,"tokens_out":74,"latency_ms":0}
   ```
 
+## Alpha-0.6 — Semantic build system (renderers + publishers)
+
+Export refactored into **renderers** (produce an explicit `ArtifactBundle`) and **publishers**
+(ZIP, GitHub) with a `RendererRegistry` ([ADR-0009](../02-architecture/adr/0009-semantic-build-system.md)).
+**34 tests passing.**
+
+- **Bundle (rendered):** `README.md` (synthesized) · `docs/ADR-0001.md` · `docs/vision.md` ·
+  `docs/prd.md` · `LICENSE` · `.gitignore`.
+- **Publishers:** `ZipPublisher` (real, download) · `GitHubPublisher` (behind a `GitHubClient`
+  port; verified via a fake — `create_repo` + `commit_files` → repo URL + commit SHA). Real push
+  gated on a token (OAuth in Alpha-0.7).
+- **Framing:** Project Knowledge → Semantic Compiler → Artifacts → Publishers (≈ source → compiler → binary).
+
 ## Alpha-0.5 — ADR generation (DecisionGraph)
 
 ADRs synthesized through the same pattern as README — `KnowledgeGraph → DecisionExtractor →
