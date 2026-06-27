@@ -15,7 +15,10 @@ class CompilerPass(Protocol):
     name: str
     consumes: list[str]
     produces: list[str]
-    deterministic: bool
+    deterministic: bool   # same inputs always yield the same outputs (no side effects, no I/O)
+    cacheable: bool       # output may be memoized by input hash — distinct from deterministic:
+    #                       a pass can be deterministic yet uncacheable (PublishPass must always run),
+    #                       and cacheability is what the runner will key on once pass caching lands.
 
     def run(self, context: dict) -> dict:
         ...
@@ -26,6 +29,7 @@ class ExtractKnowledgePass:
     consumes = ["title", "idea", "sources"]
     produces = ["knowledge"]
     deterministic = True
+    cacheable = True
 
     def run(self, context: dict) -> dict:
         graph = KnowledgeExtractor().extract(context["title"], context["idea"], context["sources"])
@@ -37,6 +41,7 @@ class ExtractDecisionPass:
     consumes = ["knowledge"]
     produces = ["decisions"]
     deterministic = True
+    cacheable = True
 
     def run(self, context: dict) -> dict:
         return {"decisions": DecisionExtractor().extract(context["knowledge"])}
@@ -47,6 +52,7 @@ class BuildPass:
     consumes = ["title", "idea", "sources"]
     produces = ["bundle"]
     deterministic = True
+    cacheable = True
 
     def run(self, context: dict) -> dict:
         ctx = RenderContext(title=context["title"], idea=context["idea"], artifacts=context["sources"])
@@ -58,6 +64,7 @@ class ExplainPass:
     consumes = ["knowledge", "decisions", "sources", "bundle"]
     produces = ["explanations"]
     deterministic = True
+    cacheable = True
 
     def run(self, context: dict) -> dict:
         graph = ExplanationExtractor().extract(

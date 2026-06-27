@@ -1,7 +1,23 @@
 """Explainability — the ExplanationGraph compiler output + the pass pipeline."""
 import pytest
 
-from engineering_os.modules.compiler.passes import ExtractKnowledgePass, PassRunner, run_explain_pipeline
+from engineering_os.modules.compiler.passes import (
+    EXPLAIN_PIPELINE,
+    ExtractKnowledgePass,
+    PassRunner,
+    run_explain_pipeline,
+)
+
+
+def test_every_pass_declares_the_full_contract():
+    for p in EXPLAIN_PIPELINE:
+        assert isinstance(p.name, str) and p.name
+        assert isinstance(p.consumes, list) and isinstance(p.produces, list)
+        assert isinstance(p.deterministic, bool)
+        assert isinstance(p.cacheable, bool)  # distinct from deterministic — keyed on by pass caching
+        # a cacheable pass must be deterministic (you can't safely memoize a non-deterministic output)
+        if p.cacheable:
+            assert p.deterministic
 
 
 def test_explain_pipeline_produces_explanations_with_provenance():

@@ -43,9 +43,17 @@ class CompilerPass(Protocol):
     name: str
     consumes: list[str]      # required context keys (Dependencies)
     produces: list[str]      # context keys it adds (Output)
-    deterministic: bool
+    deterministic: bool      # same inputs → same outputs, no side effects
+    cacheable: bool          # output may be memoized by input hash
     def run(self, context: dict) -> dict: ...
 ```
+
+`deterministic` and `cacheable` are deliberately separate. They coincide today (every extraction
+pass is both), but they diverge the moment effectful passes arrive: a `PublishPass` is **not**
+deterministic and **not** cacheable (it must always run), whereas a future `RepositorySyncPass`
+might be deterministic-in-inputs yet uncacheable because it reads live remote state. `cacheable` is
+the property the runner will key on once pass-output caching lands — keeping it distinct now avoids
+conflating "pure" with "safe to skip."
 
 The pipeline becomes a literal **sequence of passes** over a shared context, run by a `PassRunner`
 that validates each pass's declared inputs before invoking it:
@@ -86,6 +94,19 @@ The endpoint `GET /projects/{id}/explanations` exposes it.
 
 ## Future revisit
 
-Promote the shared `context: dict` to a typed compiler context once the key surface stabilizes; add
-`deterministic`-pass caching keyed by input hashes; record *why* an artifact regenerated (link the
-diff back to the explanation that changed).
+- **Typed `CompilerContext` (highest-priority internal refactor, after authentication).** Promote the
+  shared `context: dict` to a typed object (`knowledge?`, `decisions?`, `bundle?`, `explanations?`,
+  `repository_state?`, `metrics?`, `diagnostics?`). Then a pass's declared `consumes`/`produces` can be
+  validated against the context shape at startup, not only at runtime — recovering compiler-grade
+  guarantees the dict erases. Deferred only because the key surface is still moving.
+- **Pass-output caching** keyed by input hash, gated on `cacheable` (not `deterministic`).
+- **Provenance of regeneration** — link the diff back to the explanation that changed, so the system
+  records *why* an artifact regenerated, not just that it did.
+
+## Boundary (non-goal)
+
+The compiler does not know who the user is. Identity, authorization, and OAuth federation wrap the
+compiler as application-layer services; they are **not** passes. A pass receives a project and
+produces artifacts — authentication decides *whether* to run the compiler and *where* to publish, never
+*what* it compiles. `RepositorySyncPass` (post-OAuth) is the one seam that touches remote state, and it
+consumes a token handed in by that outer layer rather than reaching for identity itself.
