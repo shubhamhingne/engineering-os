@@ -20,6 +20,21 @@ integration, e2e) and a live run.
    "provider":"fake","model":"fake-1","tokens_in":11,"tokens_out":74,"latency_ms":0}
   ```
 
+## Alpha-0.8 — Identity, federation, and the compiler boundary
+
+GitHub OAuth, sessions, and project ownership — added as application-layer services that **wrap** the
+compiler ([ADR-0012](../02-architecture/adr/0012-identity-federation-boundary.md)). The compiler still
+receives only a `Project`. **54 tests passing.**
+
+- **OAuth flow (end to end, fake provider):** `login → 307 to provider (+state cookie) → callback →
+  session cookie → GET /auth/me ⇒ {username}`. Real `GitHubOAuthProvider` behind the same port.
+- **Ownership (captured):** alice creates a project; bob's session gets `403` on it and an empty list;
+  alice still reads it `200`. Authorization lives in one dependency (`get_owned_project`).
+- **The boundary, structural:** `authenticate → authorize(project) → compile(project) →
+  publish(bundle, credential)`. The `CredentialProvider` seam hands `GitHubPublisher` a token; the
+  publisher never imports identity, sessions, or OAuth.
+- **Semantic test:** *no GitHub credential on the session → publish returns `400`, not a crash.*
+
 ## Alpha-0.7 — Explainability (`ExplanationGraph` + compiler passes)
 
 The compiler can now explain itself ([ADR-0011](../02-architecture/adr/0011-explainability-compiler-passes.md)):

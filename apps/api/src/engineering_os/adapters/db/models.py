@@ -26,10 +26,38 @@ def _now() -> dt.datetime:
     return dt.datetime.now(dt.timezone.utc)
 
 
+class User(Base):
+    """An authenticated identity. GitHub is the only federation today (Alpha-0.8), so the identity
+    is intentionally minimal — no passwords, no profile. The application layer owns this model; the
+    compiler never sees it (ADR-0012)."""
+
+    __tablename__ = "users"
+
+    id: Mapped[str] = mapped_column(String, primary_key=True, default=_uuid)
+    github_id: Mapped[str] = mapped_column(String(40), unique=True, index=True)
+    username: Mapped[str] = mapped_column(String(120))
+    avatar_url: Mapped[Optional[str]] = mapped_column(String(400), nullable=True)
+    created_at: Mapped[dt.datetime] = mapped_column(DateTime(timezone=True), default=_now)
+
+
+class UserSession(Base):
+    """An application session: the bridge between a logged-in user and the GitHub access token used
+    for publishing. The token lives here, scoped to the session — never on the User, never in the
+    compiler. The opaque `id` is the cookie value."""
+
+    __tablename__ = "user_sessions"
+
+    id: Mapped[str] = mapped_column(String, primary_key=True)
+    user_id: Mapped[str] = mapped_column(ForeignKey("users.id"), index=True)
+    github_token: Mapped[str] = mapped_column(String(255))
+    created_at: Mapped[dt.datetime] = mapped_column(DateTime(timezone=True), default=_now)
+
+
 class Project(Base):
     __tablename__ = "projects"
 
     id: Mapped[str] = mapped_column(String, primary_key=True, default=_uuid)
+    owner_id: Mapped[Optional[str]] = mapped_column(ForeignKey("users.id"), index=True, nullable=True)
     title: Mapped[str] = mapped_column(String(200))
     idea: Mapped[str] = mapped_column(Text)
     created_at: Mapped[dt.datetime] = mapped_column(DateTime(timezone=True), default=_now)

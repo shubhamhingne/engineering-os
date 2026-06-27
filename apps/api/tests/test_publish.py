@@ -39,6 +39,8 @@ def test_publish_github_endpoint_with_fake(client):
     assert data["target"] == "github" and data["url"].endswith("/my-repo") and data["commit_sha"]
 
 
-def test_publish_github_not_configured_400(client):
+def test_publish_github_no_credential_400(client):
+    # No GitHub credential on the session → the client cannot be built → 400 (not a crash).
+    app.dependency_overrides[get_github_client] = lambda: None
     pid = client.post("/api/v1/projects", json={"title": "T", "idea": "x"}).json()["id"]
     assert client.post(f"/api/v1/projects/{pid}/publish/github", json={"repo_name": "r"}).status_code == 400

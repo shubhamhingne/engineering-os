@@ -13,8 +13,18 @@ class Settings(BaseSettings):
     anthropic_api_key: str = ""
     ai_model: str = "claude-sonnet-4-6"
 
-    # GitHub publishing (a real OAuth/user-token flow arrives in Alpha-0.8)
+    # GitHub publishing — legacy single-token fallback. The user OAuth flow (below) supersedes it:
+    # publishing credentials now come from the authenticated session via the CredentialProvider.
     github_token: str = ""
+
+    # Identity & federation (Alpha-0.8). When the OAuth client id/secret are unset, a deterministic
+    # fake provider is used so local dev and tests need no GitHub app.
+    github_oauth_client_id: str = ""
+    github_oauth_client_secret: str = ""
+    oauth_redirect_uri: str = "http://localhost:8000/api/v1/auth/github/callback"
+    web_url: str = "http://localhost:3000"          # where to send the browser after login
+    session_cookie: str = "eos_session"
+    cookie_secure: bool = False                       # True behind HTTPS in production
 
 
 settings = Settings()

@@ -1,9 +1,10 @@
 # 0003 — Authentication & GitHub authorization
 
-- **Status:** Accepted
+- **Status:** Accepted — implemented and refined by [ADR-0012](0012-identity-federation-boundary.md)
+  (GitHub-first OAuth, session-scoped tokens, the `CredentialProvider` seam, and the compiler boundary)
 - **Date:** 2026-06-27
 - **Deciders:** Lead Architect
-- **Related:** ADR-0002, [16 — Security model](../16-security-model.md)
+- **Related:** ADR-0002, [ADR-0012](0012-identity-federation-boundary.md), [16 — Security model](../16-security-model.md)
 
 ## Context
 

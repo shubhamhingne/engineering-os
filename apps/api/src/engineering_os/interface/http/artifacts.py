@@ -8,15 +8,14 @@ from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 
-from ...adapters.db.models import ArtifactVersion
+from ...adapters.db.models import ArtifactVersion, Project
 from ...modules.artifacts.service import ArtifactService
 from ...modules.generation.service import GenerationService
-from ...modules.projects.service import NotFoundError, ProjectService
 from ...modules.decision.service import ADRRenderer, DecisionExtractor
 from ...modules.knowledge.service import KnowledgeExtractor
 from ...modules.readme.service import ReadmeService
 from ...ports.ai_provider import AIProvider
-from .deps import get_db, get_provider
+from .deps import get_db, get_owned_project, get_provider
 from .schemas import ArtifactSave, ArtifactVersionOut, ReadmeQualityOut, VersionSummaryOut
 
 router = APIRouter(prefix="/api/v1")
@@ -39,13 +38,6 @@ def _require_type(artifact_type: str) -> None:
         raise HTTPException(status_code=404, detail=f"unsupported artifact type: {artifact_type}")
 
 
-def _require_project(db: Session, project_id: str):
-    try:
-        return ProjectService(db).get(project_id)
-    except NotFoundError:
-        raise HTTPException(status_code=404, detail="project not found")
-
-
 def _out(artifact_type: str, version: ArtifactVersion) -> ArtifactVersionOut:
     return ArtifactVersionOut(
         type=artifact_type,
@@ -59,13 +51,13 @@ def _out(artifact_type: str, version: ArtifactVersion) -> ArtifactVersionOut:
 
 @router.post("/projects/{project_id}/artifacts/{artifact_type}", response_model=ArtifactVersionOut, status_code=201)
 def generate_artifact(
-    project_id: str,
     artifact_type: str,
+    project: Project = Depends(get_owned_project),
     db: Session = Depends(get_db),
     provider: AIProvider = Depends(get_provider),
 ) -> ArtifactVersionOut:
     _require_type(artifact_type)
-    project = _require_project(db, project_id)
+    project_id = project.id
     artifacts = ArtifactService(db)
 
     # README is synthesized from the project's KnowledgeGraph, not a single prompt.
@@ -101,9 +93,10 @@ def generate_artifact(
 
 
 @router.get("/projects/{project_id}/artifacts/readme/quality", response_model=ReadmeQualityOut)
-def readme_quality(project_id: str, db: Session = Depends(get_db)) -> ReadmeQualityOut:
-    project = _require_project(db, project_id)
-    present = _present_artifacts(ArtifactService(db), project_id)
+def readme_quality(
+    project: Project = Depends(get_owned_project), db: Session = Depends(get_db)
+) -> ReadmeQualityOut:
+    present = _present_artifacts(ArtifactService(db), project.id)
     score, missing, provenance = ReadmeService().assess(project.title, project.idea, present)
     return ReadmeQualityOut(score=score, missing=missing, provenance=provenance)
 
@@ -114,15 +107,15 @@ def _sse(event: str, data: dict) -> str:
 
 @router.post("/projects/{project_id}/artifacts/{artifact_type}/stream")
 def stream_artifact(
-    project_id: str,
     artifact_type: str,
+    project: Project = Depends(get_owned_project),
     db: Session = Depends(get_db),
     provider: AIProvider = Depends(get_provider),
 ) -> StreamingResponse:
     _require_type(artifact_type)
     if artifact_type not in STREAMABLE_TYPES:
         raise HTTPException(status_code=400, detail=f"{artifact_type} is synthesized, not streamed")
-    project = _require_project(db, project_id)
+    project_id = project.id
     artifacts = ArtifactService(db)
 
     if artifact_type == "vision":
@@ -169,10 +162,11 @@ def stream_artifact(
 
 
 @router.get("/projects/{project_id}/artifacts/{artifact_type}", response_model=ArtifactVersionOut)
-def get_artifact(project_id: str, artifact_type: str, db: Session = Depends(get_db)) -> ArtifactVersionOut:
+def get_artifact(
+    artifact_type: str, project: Project = Depends(get_owned_project), db: Session = Depends(get_db)
+) -> ArtifactVersionOut:
     _require_type(artifact_type)
-    _require_project(db, project_id)
-    version = ArtifactService(db).current(project_id, artifact_type)
+    version = ArtifactService(db).current(project.id, artifact_type)
     if version is None:
         raise HTTPException(status_code=404, detail=f"no {artifact_type} yet")
     return _out(artifact_type, version)
@@ -180,11 +174,13 @@ def get_artifact(project_id: str, artifact_type: str, db: Session = Depends(get_
 
 @router.put("/projects/{project_id}/artifacts/{artifact_type}", response_model=ArtifactVersionOut)
 def save_artifact(
-    project_id: str, artifact_type: str, body: ArtifactSave, db: Session = Depends(get_db)
+    artifact_type: str,
+    body: ArtifactSave,
+    project: Project = Depends(get_owned_project),
+    db: Session = Depends(get_db),
 ) -> ArtifactVersionOut:
     _require_type(artifact_type)
-    _require_project(db, project_id)
-    version = ArtifactService(db).add_version(project_id, artifact_type, body.content, "human")
+    version = ArtifactService(db).add_version(project.id, artifact_type, body.content, "human")
     return _out(artifact_type, version)
 
 
@@ -192,10 +188,11 @@ def save_artifact(
     "/projects/{project_id}/artifacts/{artifact_type}/versions",
     response_model=list[VersionSummaryOut],
 )
-def list_versions(project_id: str, artifact_type: str, db: Session = Depends(get_db)) -> list[VersionSummaryOut]:
+def list_versions(
+    artifact_type: str, project: Project = Depends(get_owned_project), db: Session = Depends(get_db)
+) -> list[VersionSummaryOut]:
     _require_type(artifact_type)
-    _require_project(db, project_id)
     return [
         VersionSummaryOut(version=v.version_no, source=v.source, model=v.model, created_at=v.created_at)
-        for v in ArtifactService(db).versions(project_id, artifact_type)
+        for v in ArtifactService(db).versions(project.id, artifact_type)
     ]

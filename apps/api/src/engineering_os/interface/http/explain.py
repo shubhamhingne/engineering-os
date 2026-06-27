@@ -1,23 +1,21 @@
 """Explainability endpoint — exposes the ExplanationGraph (the differentiator)."""
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
+from ...adapters.db.models import Project
 from ...modules.artifacts.service import ArtifactService
 from ...modules.compiler.passes import run_explain_pipeline
-from ...modules.projects.service import NotFoundError, ProjectService
-from .deps import get_db
+from .deps import get_db, get_owned_project
 from .schemas import ExplanationOut
 
 router = APIRouter(prefix="/api/v1")
 
 
 @router.get("/projects/{project_id}/explanations", response_model=list[ExplanationOut])
-def explanations(project_id: str, db: Session = Depends(get_db)) -> list[ExplanationOut]:
-    try:
-        project = ProjectService(db).get(project_id)
-    except NotFoundError:
-        raise HTTPException(status_code=404, detail="project not found")
-
+def explanations(
+    project: Project = Depends(get_owned_project), db: Session = Depends(get_db)
+) -> list[ExplanationOut]:
+    project_id = project.id
     artifacts = ArtifactService(db)
     sources: dict[str, str] = {}
     for t in artifacts.types_present(project_id):

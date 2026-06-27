@@ -41,6 +41,25 @@ which is itself one of the lessons. These are reflections, not achievements.
   each was wrong for the MVP. Reaching for sophistication before the simple version is proven is a
   common senior-engineer trap I had to actively resist.
 
+## Release retrospective — Alpha-0.8 (identity, federation, and the boundary)
+
+1. **What user problem did this solve?** Proving who you are and that you're allowed to publish.
+   GitHub OAuth signs you in, your projects become yours (others get `403`), and publishing uses
+   *your* token — no shared secret.
+2. **What architectural decision made it possible?** Adding identity as application-layer services
+   that **wrap** the compiler, never enter it ([ADR-0012](../02-architecture/adr/0012-identity-federation-boundary.md)).
+   The request path is `authenticate → authorize(project) → compile(project) → publish(bundle, credential)`,
+   and a `CredentialProvider` port hands the publisher a token without it ever learning OAuth exists —
+   the same dependency inversion as renderers/publishers.
+3. **What trade-off did I consciously accept?** GitHub-only login and a flat ownership model (no
+   teams, roles, or local accounts) — because today this is a *publishing* platform, not a
+   collaboration one. And server-side sessions over stateless JWTs: revocable and simple now, a
+   caching concern only at far greater scale. The hard line I refused to cross: the compiler must not
+   know who the user is, so it stays runnable in a CLI, CI, or a test with no session.
+4. **If I rebuilt this in a year, what would I change?** Nothing about the boundary — that's the part
+   I'd protect hardest. I'd reach sooner for the typed `CompilerContext` so the boundary is enforced
+   by types at startup, not just by discipline.
+
 ## Release retrospective — Alpha-0.7 (explainability + compiler passes)
 
 1. **What user problem did this solve?** Trust. The tool can now answer *"why is this here, and what
