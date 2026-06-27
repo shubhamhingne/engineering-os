@@ -1,0 +1,37 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Export</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0F172A;--raised:#1E293B;--line:#334155;--border:#1E293B;--text:#F8FAFC;--t2:#94A3B8;--muted:#64748B;--action:#2563EB;--accent:#06B6D4;--accent2:#22D3EE;--green:#22C55E;--sunken:#0B1220;--mono:'JetBrains Mono',monospace}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Inter,system-ui,sans-serif;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased;padding:18px;width:360px}
+.hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}.hd h2{font-size:14px;font-weight:600}.x{color:var(--muted)}
+.card{background:var(--raised);border:1px solid var(--line);border-radius:10px;padding:12px;margin-bottom:14px}
+.lab{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:9px;font-weight:600}
+.step{display:flex;align-items:center;gap:10px;padding:3px 0;font-size:13px}
+.ck{width:16px;height:16px;border-radius:50%;display:grid;place-items:center;font-size:9px;background:rgba(34,197,94,.15);color:var(--green)}
+.meta{font-size:12.5px;color:var(--t2);margin-bottom:11px}
+.btn{display:flex;align-items:center;justify-content:center;gap:7px;width:100%;padding:9px;border-radius:8px;font-size:13px;font-weight:500;margin-bottom:8px;border:0}
+.b1{background:var(--action);color:#fff}.b2{background:transparent;border:1px solid var(--line);color:var(--t2)}.b3{background:transparent;color:var(--muted)}
+.ev{display:flex;align-items:center;gap:8px;font-size:12.5px;padding:3px 0;color:var(--t2)}.dot{width:6px;height:6px;border-radius:50%;background:var(--green)}.sz{margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--muted)}.dl{color:var(--accent)}
+</style></head><body>
+<div class="hd"><h2>Export</h2><span class="x">✕</span></div>
+<div class="card">
+  <div class="step"><span class="ck">✓</span> Queued</div>
+  <div class="step"><span class="ck">✓</span> Validating artifacts</div>
+  <div class="step"><span class="ck">✓</span> Building README</div>
+  <div class="step"><span class="ck">✓</span> Packaging ZIP</div>
+  <div class="step"><span class="ck">✓</span> Verifying</div>
+</div>
+<div class="card">
+  <div class="lab">Download center</div>
+  <div class="meta">engineering-os.zip · 1.2 KB · 2 artifacts</div>
+  <button class="btn b1">⤓ &nbsp;Download ZIP</button>
+  <button class="btn b2">Open in GitHub (soon)</button>
+  <button class="btn b3">Open in VS Code (soon)</button>
+</div>
+<div class="card" style="margin-bottom:0">
+  <div class="lab">Export history</div>
+  <div class="ev"><span class="dot"></span> engineering-os.zip <span class="sz">1.2KB</span> <span class="dl">⤓</span></div>
+  <div class="ev"><span class="dot"></span> engineering-os.zip <span class="sz">0.9KB</span> <span class="dl">⤓</span></div>
+</div>
+</body></html>

@@ -24,6 +24,9 @@ deliberately, so the portfolio value compounds with the product.
   as a 12-component library on one I/O hook).
 - **Shipped (Day 12):** streaming generation (SSE, ADR-0005) — live stages + growing content,
   functional command palette (⌘K), version diff, premium empty states; 16 tests passing.
+- **Shipped (Day 13):** Project Export Pipeline (`ExportJob`, ADR-0006) — streamed phases
+  (queued→preparing→generating→packaging→verifying→done), real downloadable ZIP, export history +
+  download center, dedicated export panel; 19 tests passing.
 
 **Stack showcased:** Next.js (web) · FastAPI (Python) · PostgreSQL · Auth · LLM integration ·
 GitHub API · Docker · CI/CD.

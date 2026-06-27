@@ -16,6 +16,7 @@ import { DiffViewer } from "./DiffViewer";
 import { AIContextPanel } from "./AIContextPanel";
 import { BottomActivityPanel } from "./BottomActivityPanel";
 import { CommandPalette, type Command } from "./CommandPalette";
+import { ExportPanel } from "./ExportPanel";
 
 const LABEL: Record<string, string> = { vision: "Vision", prd: "PRD", readme: "README", adr: "ADR" };
 const EMPTY: Record<string, string> = {
@@ -41,6 +42,7 @@ export function WorkspaceShell({ projectId }: { projectId: string }) {
   const [generating, setGenerating] = useState(false);
   const [stage, setStage] = useState(6);
   const [actionError, setActionError] = useState<string | null>(null);
+  const [exportMode, setExportMode] = useState(false);
 
   const saved = ws.artifact?.content ?? "";
 
@@ -105,6 +107,7 @@ export function WorkspaceShell({ projectId }: { projectId: string }) {
     { id: "gen-vision", label: "Generate Vision", group: "Actions", run: () => void handleGenerate("vision") },
     { id: "gen-prd", label: "Generate PRD", group: "Actions", run: () => void handleGenerate("prd") },
     { id: "save", label: "Save artifact", group: "Actions", shortcut: "⌘S", enabled: dirty, run: () => void handleSave() },
+    { id: "export", label: "Export project", group: "Actions", run: () => setExportMode(true) },
     { id: "open-vision", label: "Open Vision", group: "Artifacts", run: () => void ws.selectType("vision") },
     { id: "open-prd", label: "Open PRD", group: "Artifacts", run: () => void ws.selectType("prd") },
   ];
@@ -126,6 +129,9 @@ export function WorkspaceShell({ projectId }: { projectId: string }) {
           <Search className="h-3.5 w-3.5" /> Search or run a command
           <kbd className="ml-auto rounded border border-line px-1.5 font-mono text-[11px]">⌘K</kbd>
         </div>
+        <Button size="sm" variant="outline" onClick={() => setExportMode(true)}>
+          Export
+        </Button>
         <div className="h-6 w-6 rounded-full bg-gradient-to-br from-action to-accent" aria-hidden />
       </header>
 
@@ -202,12 +208,16 @@ export function WorkspaceShell({ projectId }: { projectId: string }) {
         </section>
 
         <aside className="overflow-hidden">
-          <AIContextPanel
-            artifact={ws.artifact}
-            generating={generating}
-            stage={stage}
-            onGenerate={() => handleGenerate()}
-          />
+          {exportMode ? (
+            <ExportPanel projectId={projectId} onClose={() => setExportMode(false)} />
+          ) : (
+            <AIContextPanel
+              artifact={ws.artifact}
+              generating={generating}
+              stage={stage}
+              onGenerate={() => handleGenerate()}
+            />
+          )}
         </aside>
       </div>
 

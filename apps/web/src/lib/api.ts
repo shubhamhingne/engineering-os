@@ -91,4 +91,52 @@ export const api = {
     req<Artifact>(`/projects/${id}/artifacts/${type}`, { method: "PUT", body: JSON.stringify({ content }) }),
   getVersions: (id: string, type: ArtifactType) =>
     req<VersionSummary[]>(`/projects/${id}/artifacts/${type}/versions`),
+  listExports: (id: string) => req<ExportJob[]>(`/projects/${id}/exports`),
 };
+
+export type ExportJob = {
+  id: string;
+  status: string;
+  filename: string;
+  size_bytes: number;
+  artifact_count: number;
+  created_at: string;
+};
+
+export type ExportDone = { job_id: string; filename: string; size_bytes: number; artifact_count: number };
+
+export type ExportHandlers = {
+  onPhase?: (phase: string) => void;
+  onDone?: (data: ExportDone) => void;
+  onError?: (detail: string) => void;
+};
+
+// Streamed export pipeline — reuses the same SSE pattern as generation.
+export async function streamExport(id: string, h: ExportHandlers): Promise<void> {
+  const res = await fetch(`${BASE}/api/v1/projects/${id}/export/stream`, { method: "POST" });
+  if (!res.ok || !res.body) {
+    const body = (await res.json().catch(() => ({}))) as { detail?: string };
+    throw new Error(body.detail ?? `Request failed (${res.status})`);
+  }
+  const reader = res.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = "";
+  for (;;) {
+    const { value, done } = await reader.read();
+    if (done) break;
+    buffer += decoder.decode(value, { stream: true });
+    const chunks = buffer.split("\n\n");
+    buffer = chunks.pop() ?? "";
+    for (const chunk of chunks) {
+      const event = chunk.match(/event: (\w+)/)?.[1];
+      const dataLine = chunk.split("\n").find((l) => l.startsWith("data: "))?.slice(6);
+      if (!event || !dataLine) continue;
+      const data = JSON.parse(dataLine);
+      if (event === "phase") h.onPhase?.(data.phase);
+      else if (event === "done") h.onDone?.(data);
+      else if (event === "error") h.onError?.(data.detail);
+    }
+  }
+}
+
+export const exportDownloadUrl = (jobId: string): string => `${BASE}/api/v1/exports/${jobId}/download`;

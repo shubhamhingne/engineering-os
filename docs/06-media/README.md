@@ -20,6 +20,17 @@ integration, e2e) and a live run.
    "provider":"fake","model":"fake-1","tokens_in":11,"tokens_out":74,"latency_ms":0}
   ```
 
+## Day 13 — Project Export Pipeline
+
+Export modeled as an observable `ExportJob` ([ADR-0006](../02-architecture/adr/0006-export-pipeline.md)),
+reusing the streaming infrastructure — a real, downloadable ZIP with history. **19 tests passing.**
+
+- ![Export experience](screenshots/export.png)
+- **Live pipeline phases** (captured): `queued → preparing → generating → packaging → verifying → done`
+- **Real artifact:** `engineering-os.zip` → `README.md · LICENSE · .gitignore · docs/vision.md · docs/prd.md`
+- **Feature Completeness Score:** Product 19 · UX 18 · Engineering 20 · Testing 15 · A11y 8 ·
+  Performance 9 · Docs 5 = **94/100** (merge gate ≥ 90; UI a11y/perf verified on a Node run).
+
 ## Day 12 — Make it feel alive (streaming + interactions)
 
 Real **streaming generation** (SSE, [ADR-0005](../02-architecture/adr/0005-streaming-generation.md)) —

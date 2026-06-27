@@ -19,6 +19,24 @@ flowchart LR
 6. **Review + green CI** required to merge.
 7. **Squash-merge** with a Conventional Commit title; branch auto-deletes.
 
+## Feature Completeness Score (merge gate)
+
+Every feature is scored before merge. **Below 90/100 does not merge** — this rewards deliberate
+quality over feature count.
+
+| Area | Weight |
+|---|---|
+| Product (solves the user's problem) | 20 |
+| UX (workflow is obvious) | 20 |
+| Engineering (clean, reusable, maintainable) | 20 |
+| Testing (unit + integration + e2e) | 15 |
+| Accessibility (AA, keyboard, SR, reduced-motion) | 10 |
+| Performance (meets budgets) | 10 |
+| Documentation (ADR/PRD/design updated) | 5 |
+
+The bar for a merge is the same bar as the question: *would this survive in a production SaaS used
+by 10,000 developers?*
+
 ## UI features follow the Pro Max workflow
 
 Any change with a visible surface adds these stages (no UI feature skips them):

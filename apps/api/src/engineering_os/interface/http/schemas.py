@@ -37,3 +37,12 @@ class ProjectOut(BaseModel):
     artifact_types: list[str] = []
     created_at: datetime
     updated_at: datetime
+
+
+class ExportJobOut(BaseModel):
+    id: str
+    status: str
+    filename: str
+    size_bytes: int
+    artifact_count: int
+    created_at: datetime

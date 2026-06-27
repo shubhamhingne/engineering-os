@@ -5,7 +5,7 @@ import enum
 import uuid
 from typing import Optional
 
-from sqlalchemy import DateTime, ForeignKey, Integer, String, Text, UniqueConstraint
+from sqlalchemy import DateTime, ForeignKey, Integer, LargeBinary, String, Text, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from ...db import Base
@@ -36,6 +36,9 @@ class Project(Base):
     updated_at: Mapped[dt.datetime] = mapped_column(DateTime(timezone=True), default=_now, onupdate=_now)
 
     artifacts: Mapped[list["Artifact"]] = relationship(
+        back_populates="project", cascade="all, delete-orphan"
+    )
+    export_jobs: Mapped[list["ExportJob"]] = relationship(
         back_populates="project", cascade="all, delete-orphan"
     )
 
@@ -74,3 +77,22 @@ class ArtifactVersion(Base):
     created_at: Mapped[dt.datetime] = mapped_column(DateTime(timezone=True), default=_now)
 
     artifact: Mapped[Artifact] = relationship(back_populates="versions")
+
+
+class ExportJob(Base):
+    """An observable export of a project to a packaged artifact (a ZIP for now). Modeled as a
+    job, not a one-shot call, so the pipeline can grow (GitHub push, more outputs) — ADR-0006."""
+
+    __tablename__ = "export_jobs"
+
+    id: Mapped[str] = mapped_column(String, primary_key=True, default=_uuid)
+    project_id: Mapped[str] = mapped_column(ForeignKey("projects.id"))
+    status: Mapped[str] = mapped_column(String(20))  # completed | failed
+    filename: Mapped[str] = mapped_column(String(160))
+    size_bytes: Mapped[int] = mapped_column(Integer, default=0)
+    artifact_count: Mapped[int] = mapped_column(Integer, default=0)
+    zip_data: Mapped[bytes] = mapped_column(LargeBinary)
+    created_at: Mapped[dt.datetime] = mapped_column(DateTime(timezone=True), default=_now)
+
+    project: Mapped[Project] = relationship(back_populates="export_jobs")
+

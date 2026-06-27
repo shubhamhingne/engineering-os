@@ -41,6 +41,19 @@ which is itself one of the lessons. These are reflections, not achievements.
   each was wrong for the MVP. Reaching for sophistication before the simple version is proven is a
   common senior-engineer trap I had to actively resist.
 
+## On export as a pipeline (Day 13 — the architecture pays off again)
+
+- **Export reused streaming with zero new mechanism.** Because generation streaming was built into
+  the domain (ADR-0005), the export pipeline streamed its phases the same way — same SSE shape,
+  same client pattern. The "one mental model" the user asked for fell out of the architecture, not
+  extra work.
+- **Modeling `ExportJob`, not `RepositoryGenerator`, kept the door open.** Naming it a *job* with a
+  status and history means GitHub push and new output formats are future *phases/fields*, not a
+  rewrite ([ADR-0006](../02-architecture/adr/0006-export-pipeline.md)). The name encodes the roadmap.
+- **A real ZIP beats a stubbed one.** The pipeline produces an actual downloadable archive
+  (README + LICENSE + docs), verified by tests that open the ZIP — so the feature is provably done,
+  not demo-shaped.
+
 ## On making it feel alive (Day 12 — streaming)
 
 - **The "magical" feeling is mostly honesty about progress.** Streaming the real stages
