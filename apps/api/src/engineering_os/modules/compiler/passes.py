@@ -20,6 +20,7 @@ from ..publish.publishers import GitHubPublisher, ZipPublisher
 from ..render.renderers import ArtifactBundle, RenderContext, RendererRegistry
 from ..repository.service import RepositoryState, build_repository_state
 from ...ports.repository import RepositoryReader
+from .cache import PassCache
 from .context import CompilationReport, CompilerContext, ContextKey, PassResult
 from .graph import build_dependency_graph
 
@@ -208,6 +209,12 @@ class CompilationResult:
     report: CompilationReport
 
 
+def _cache_key(descriptor: PassDescriptor, input_hash: str, fingerprint: str) -> str:
+    """Bind pass id, pass version, input hash, and compiler fingerprint — a hit means the same pass,
+    same version, same inputs, same compiler produced this before."""
+    return _hash(json.dumps([descriptor.id, descriptor.version, input_hash, fingerprint]))
+
+
 def _invalidation_reason(pass_id: str, input_hash: str, previous: Optional[CompilationReport]) -> str:
     if previous is None:
         return "cold build (no prior compilation)"
@@ -220,9 +227,10 @@ def _invalidation_reason(pass_id: str, input_hash: str, previous: Optional[Compi
 
 
 class Compiler:
-    def __init__(self, passes, seed_keys=SEED_KEYS) -> None:
+    def __init__(self, passes, seed_keys=SEED_KEYS, cache: Optional[PassCache] = None) -> None:
         self._passes = list(passes)
         self._seed_keys = tuple(seed_keys)
+        self._cache = cache
         validate_pipeline(self._passes, self._seed_keys)  # fail fast: an ill-formed pipeline never runs
 
     @property
@@ -234,22 +242,39 @@ class Compiler:
         for key, value in seed.items():
             ctx.set(key, value)
 
+        fingerprint = self.fingerprint
         results: list[PassResult] = []
         total_start = time.perf_counter()
         for p in self._passes:
             d = p.descriptor
             warned_before = len(ctx.warnings)
             input_hash = _hash_slots(ctx, d.consumes)
-            reason = _invalidation_reason(d.id, input_hash, previous)
-            start = time.perf_counter()
-            produced = p.run(ctx)
-            for key, value in produced.items():
-                ctx.set(key, value)
+            cacheable = self._cache is not None and d.cacheable  # cacheable ⇒ deterministic (invariant)
+            key = _cache_key(d, input_hash, fingerprint) if cacheable else ""
+
+            cached = self._cache.get(key) if cacheable else None
+            if cached is not None:
+                for slot, value in cached.items():
+                    ctx.set(slot, value)
+                duration = 0
+                reason = "cache hit"
+                cache_hit = True
+            else:
+                start = time.perf_counter()
+                produced = p.run(ctx)
+                for slot, value in produced.items():
+                    ctx.set(slot, value)
+                duration = int((time.perf_counter() - start) * 1000)
+                reason = _invalidation_reason(d.id, input_hash, previous)
+                cache_hit = False
+                if cacheable:
+                    self._cache.put(key, produced)
+
             results.append(
                 PassResult(
                     pass_id=d.id,
-                    duration_ms=int((time.perf_counter() - start) * 1000),
-                    cache_hit=False,
+                    duration_ms=duration,
+                    cache_hit=cache_hit,
                     inputs=[k.name for k in d.consumes],
                     outputs=[k.name for k in d.produces],
                     input_hash=input_hash,
@@ -260,12 +285,15 @@ class Compiler:
             )
         total_ms = int((time.perf_counter() - total_start) * 1000)
 
+        bundle_count = len(ctx.get(BUNDLE).artifacts) if ctx.has(BUNDLE) else 0
+        bundle_reused = any("bundle" in r.outputs and r.cache_hit for r in results)
         report = CompilationReport(
             compiler_version=COMPILER_VERSION,
-            fingerprint=self.fingerprint,
+            fingerprint=fingerprint,
             schema_versions=ctx.schema_versions,
             passes_executed=results,
-            artifacts_generated=len(ctx.get(BUNDLE).artifacts) if ctx.has(BUNDLE) else 0,
+            artifacts_generated=0 if bundle_reused else bundle_count,
+            artifacts_reused=bundle_count if bundle_reused else 0,
             cache_hits=sum(1 for r in results if r.cache_hit),
             warnings=list(ctx.warnings),
             duration_ms=total_ms,

@@ -41,6 +41,24 @@ which is itself one of the lessons. These are reflections, not achievements.
   each was wrong for the MVP. Reaching for sophistication before the simple version is proven is a
   common senior-engineer trap I had to actively resist.
 
+## Release retrospective — v1.0-α1 (pass-output caching)
+
+1. **What user problem did this solve?** Wasted work. A long-lived compiler now reuses any pass whose
+   inputs, version, and compiler haven't changed — `cache_hits` and `artifacts_reused` go from honest
+   zeros to observable reuse.
+2. **What architectural decision made it possible?** The metadata was *already there*. Caching just
+   bound it into a key — `hash(pass_id, pass_version, input_hash, compiler_fingerprint)` — and added a
+   `PassCache` port injected at the boundary ([ADR-0016](../02-architecture/adr/0016-pass-output-caching.md)).
+   Correctness fell out of the invariants: only `cacheable` (∴ deterministic, non-mutating) passes are
+   cached, so `RepositorySyncPass` keeps reading live remote state.
+3. **What trade-off did I consciously accept?** Cache is injected, not global — per-request API
+   handlers stay cache-less and deterministic; a worker opts in. And `InMemoryPassCache` is
+   process-local and unbounded — the mechanism, not yet the persistence.
+4. **If I rebuilt this in a year, what would I change?** Nothing about the approach — this is the
+   v1.0 thesis in miniature: each step *activates capability already present* rather than adding a new
+   concept. The cache is also the lever that makes the DAG scheduler testable next ("did it run only
+   the uncached subgraph?").
+
 ## Release retrospective — Alpha-0.9 (repository synchronization)
 
 1. **What user problem did this solve?** "Is what I published current?" The system can now observe the

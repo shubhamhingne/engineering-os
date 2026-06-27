@@ -20,6 +20,22 @@ integration, e2e) and a live run.
    "provider":"fake","model":"fake-1","tokens_in":11,"tokens_out":74,"latency_ms":0}
   ```
 
+## v1.0-α1 — Pass-output caching (activating the collected metadata)
+
+The compiler's bookkeeping becomes reuse ([ADR-0016](../02-architecture/adr/0016-pass-output-caching.md)):
+a `PassCache` keyed on `hash(pass_id, pass_version, input_hash, compiler_fingerprint)`. **75 tests passing.**
+
+- **Cold → warm (captured):**
+  ```
+  run1 (cold)   cache_hits=0   artifacts_generated=5   artifacts_reused=0
+  run2 (warm)   cache_hits=4   artifacts_generated=0   artifacts_reused=5   (all reasons: "cache hit")
+  run3 (idea changed)   cache_hits=0   (input_hash differs → key differs)
+  ```
+- **Non-cacheable passes never cache:** in the sync pipeline's warm run, `build` is a cache hit while
+  `repository_sync` re-executes — it reads live remote state, so it is neither deterministic nor cacheable.
+- **Injected, not global:** per-request API handlers stay cache-less and deterministic; a long-lived
+  worker opts in via `Compiler(passes, cache=…)`.
+
 ## Alpha-0.9 — Repository synchronization (GitHub as sync, not upload)
 
 `RepositoryState` — the remote analogue of `CompilationReport` — and a single `RepositorySyncPass`
