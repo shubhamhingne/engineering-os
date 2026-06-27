@@ -11,6 +11,11 @@
   </p>
 </div>
 
+> **This repository is complete with respect to the v1.0 specification.** Future work explores the
+> *consequences* of the model rather than extending it. New capability enters as *implementation*
+> behind the existing contracts; the model itself changes only through a versioned amendment under
+> the [specification's governance rule](docs/02-architecture/20-compiler-specification.md#governance).
+
 > This README is the entry point. A new visitor should be able to navigate the entire project
 > from here.
 

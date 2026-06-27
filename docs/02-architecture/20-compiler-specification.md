@@ -10,6 +10,8 @@ to predict *where a new capability belongs* before reading a line of the impleme
 
 - **Status:** v1.0 — **frozen contract.** The compiler model changes only through a deliberate,
   versioned amendment (see *Governance* below). · **Compiler version:** `1.0`
+- The repository is **complete with respect to this specification**: future work explores the
+  consequences of the model, not extensions to it.
 
 ## Governance
 

@@ -29,3 +29,6 @@ coverage/
 # local databases
 *.db
 *.sqlite3
+
+# personal research journal — questions, not TODOs; never tracked (kept local on purpose)
+QUESTIONS.md
