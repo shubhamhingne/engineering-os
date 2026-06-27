@@ -25,6 +25,7 @@ their own docs and linked here.
 | [0015](../02-architecture/adr/0015-repository-state-sync-pass.md) | RepositoryState and the RepositorySyncPass (GitHub as synchronization) |
 | [0016](../02-architecture/adr/0016-pass-output-caching.md) | Pass-output caching (cache key binds pass version + input hash + fingerprint) |
 | [0017](../02-architecture/adr/0017-dependency-driven-execution.md) | Dependency-driven execution and the ExecutionPlan (minimal subgraph) |
+| [0018](../02-architecture/adr/0018-build-manifest.md) | BuildManifest — the immutable, content-addressed identity of a compilation |
 
 New ADRs use the
 [template](https://github.com/shubhamhingne/.github/blob/main/docs/adr/0000-template.md).

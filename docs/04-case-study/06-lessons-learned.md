@@ -41,6 +41,25 @@ which is itself one of the lessons. These are reflections, not achievements.
   each was wrong for the MVP. Reaching for sophistication before the simple version is proven is a
   common senior-engineer trap I had to actively resist.
 
+## Release retrospective — v1.0-α3 (the BuildManifest)
+
+1. **What user problem did this solve?** A stable answer to "exactly what compilation are we talking
+   about?" Every compile now has an immutable, content-addressed receipt — the canonical reference for
+   replay, audit, provenance, and sync.
+2. **What architectural decision made it possible?** Ten releases of prerequisites: fingerprints,
+   hashes, the plan, the report. `BuildManifest` is tiny — it *references* the immutable products by id
+   and never duplicates them ([ADR-0018](../02-architecture/adr/0018-build-manifest.md)). `manifest_hash`
+   is the *semantic* identity (fingerprint + artifact hashes + repository-state id), so it's stable
+   across cold vs warm execution; the plan/report ids ride in the body for replay navigation.
+3. **What trade-off did I consciously accept?** I deviated from the original sketch, which hashed the
+   plan/report ids into the identity — that would make a cold build and a cached rebuild of the same
+   inputs look like different compilations. The manifest answers *what*, not *how*, so the identity
+   hashes the result and references the execution. (Easy to revisit if a use ever wants
+   execution-specific identity.)
+4. **If I rebuilt this in a year, what would I change?** Nothing — but this is the boundary the mentor
+   named. The next release isn't a new subsystem; it's *hardening* — proving the eleven-plus invariants
+   hold under property-based and adversarial conditions before v1.0.
+
 ## Release retrospective — v1.0-α2 (dependency-driven execution)
 
 1. **What user problem did this solve?** Wasted recompilation. Change one input and the compiler now

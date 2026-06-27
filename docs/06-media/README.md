@@ -20,6 +20,24 @@ integration, e2e) and a live run.
    "provider":"fake","model":"fake-1","tokens_in":11,"tokens_out":74,"latency_ms":0}
   ```
 
+## v1.0-α3 — BuildManifest (the immutable identity of a compilation)
+
+A tiny, content-addressed receipt that references the immutable products rather than duplicating them
+([ADR-0018](../02-architecture/adr/0018-build-manifest.md)). **87 tests passing.**
+
+- **Semantic identity (captured):** a cold build and a fully-cached rebuild of the same inputs share a
+  manifest hash, while their plan ids differ:
+  ```
+  cold   manifest=ebf1d415dc2e   plan_id=ee044e6c7990
+  warm   manifest=ebf1d415dc2e   plan_id=1b922fc5bdd2
+  → manifest_hash equal (same WHAT), plan_id differs (different HOW)
+  ```
+- **Comparison is instant:** equal `manifest_hash` ⇔ semantically identical compilation; different
+  inputs ⇒ different hash. The manifest is a frozen dataclass — tampering raises `FrozenInstanceError`.
+- **Tiny by design:** `manifest_hash · compiler_fingerprint · plan_id · report_id ·
+  repository_state_id · artifact_hashes · generated_at` — no graphs, no reports duplicated.
+  `GET /projects/{id}/build-manifest` surfaces it.
+
 ## v1.0-α2 — Dependency-driven execution (the minimal subgraph)
 
 The compiler computes an `ExecutionPlan` from the dependency graph + cache *before* running, then

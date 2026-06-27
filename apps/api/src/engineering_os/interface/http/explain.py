@@ -6,9 +6,10 @@ from sqlalchemy.orm import Session
 
 from ...adapters.db.models import Project
 from ...modules.artifacts.service import ArtifactService
+from ...modules.compiler.manifest import build_manifest
 from ...modules.compiler.passes import compile_project, run_explain_pipeline
 from .deps import get_db, get_owned_project
-from .schemas import CompilationReportOut, ExplanationOut, PassResultOut
+from .schemas import BuildManifestOut, CompilationReportOut, ExplanationOut, PassResultOut
 
 router = APIRouter(prefix="/api/v1")
 
@@ -75,4 +76,21 @@ def compilation_report(
         warnings=report.warnings,
         duration_ms=report.duration_ms,
         commit_sha=report.commit_sha,
+    )
+
+
+@router.get("/projects/{project_id}/build-manifest", response_model=BuildManifestOut)
+def build_manifest_endpoint(
+    project: Project = Depends(get_owned_project), db: Session = Depends(get_db)
+) -> BuildManifestOut:
+    result = compile_project(project.title, project.idea, _sources(db, project.id))
+    manifest = build_manifest(result)
+    return BuildManifestOut(
+        manifest_hash=manifest.manifest_hash,
+        compiler_fingerprint=manifest.compiler_fingerprint,
+        plan_id=manifest.plan_id,
+        report_id=manifest.report_id,
+        repository_state_id=manifest.repository_state_id,
+        artifact_hashes=manifest.artifact_hashes,
+        generated_at=manifest.generated_at,
     )

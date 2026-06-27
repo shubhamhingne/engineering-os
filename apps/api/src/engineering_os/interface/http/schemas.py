@@ -86,6 +86,16 @@ class ExplanationOut(BaseModel):
     confidence: float
 
 
+class BuildManifestOut(BaseModel):
+    manifest_hash: str
+    compiler_fingerprint: str
+    plan_id: str
+    report_id: str
+    repository_state_id: Optional[str] = None
+    artifact_hashes: dict[str, str]
+    generated_at: Optional[str] = None
+
+
 class PassResultOut(BaseModel):
     pass_id: str
     duration_ms: int

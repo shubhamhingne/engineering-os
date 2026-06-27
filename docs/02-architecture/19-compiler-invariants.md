@@ -18,6 +18,7 @@ introducing a new one — explicitly, in an ADR.
 | 9 | **Every compile is observable.** A run yields a `CompilationReport` — the build log of what ran, produced, and reused. | `CompilationReport` ([ADR-0013](adr/0013-typed-compiler-context.md)) |
 | 10 | **Every run is fingerprinted.** The report pins not just the inputs but the compiler configuration that produced them, and each pass records why it ran. | `compute_fingerprint` + per-pass hashing ([ADR-0014](adr/0014-compiler-fingerprint-and-dependency-graph.md)) |
 | 11 | **Every produced slot has exactly one producer.** Ownership of compiler state is unambiguous — no two passes write the same `ContextKey`. | `validate_pipeline` duplicate-producer check ([ADR-0013](adr/0013-typed-compiler-context.md), [ADR-0014](adr/0014-compiler-fingerprint-and-dependency-graph.md)) |
+| 12 | **Every compilation has exactly one immutable BuildManifest.** The manifest is the compilation's content-addressed identity and canonical reference for replay, audit, and provenance. | `build_manifest` + frozen `BuildManifest` ([ADR-0018](adr/0018-build-manifest.md)) |
 
 ## The rule
 
