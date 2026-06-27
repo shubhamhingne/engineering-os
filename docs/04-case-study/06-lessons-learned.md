@@ -41,6 +41,23 @@ which is itself one of the lessons. These are reflections, not achievements.
   each was wrong for the MVP. Reaching for sophistication before the simple version is proven is a
   common senior-engineer trap I had to actively resist.
 
+## Release retrospective — Alpha-0.4 (README synthesis)
+
+Every release answers four questions.
+
+1. **What user problem did this solve?** Every generated project needs a credible landing page —
+   a README that reflects the project's *actual* intent — without the author writing it by hand.
+2. **What architectural decision made it possible?** The **`KnowledgeGraph`** ([ADR-0007](../02-architecture/adr/0007-knowledge-synthesis.md)) —
+   an internal semantic model extracted from the artifacts. The README is *synthesized from the
+   graph*, so it reasons over the project instead of concatenating documents.
+3. **What trade-off did I consciously accept?** Deterministic heuristic extraction over a single AI
+   prompt. It's less linguistically nuanced, but it's **testable** ("if the Vision mentions auth,
+   the README contains it") and **provenance-rich** — properties I valued more than prose polish at
+   this stage.
+4. **If I rebuilt this in a year, what would I change?** Extract the graph with a structured-output
+   AI pass for richer features/architecture (keeping the deterministic fallback + provenance), and
+   persist the KnowledgeGraph as a first-class artifact so every document shares one source of truth.
+
 ## On export as a pipeline (Day 13 — the architecture pays off again)
 
 - **Export reused streaming with zero new mechanism.** Because generation streaming was built into

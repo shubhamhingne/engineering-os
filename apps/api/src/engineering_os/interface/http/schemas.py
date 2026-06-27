@@ -39,6 +39,12 @@ class ProjectOut(BaseModel):
     updated_at: datetime
 
 
+class ReadmeQualityOut(BaseModel):
+    score: int
+    missing: list[str]
+    provenance: dict[str, list[str]]
+
+
 class ExportJobOut(BaseModel):
     id: str
     status: str

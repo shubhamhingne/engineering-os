@@ -59,6 +59,21 @@ session; all artifacts persist.
 
 **Stack showcased (adds):** multi-tenant architecture · RBAC · billing · React Native (cross-platform) · infra automation.
 
+## Releases
+
+Tracked as releases, not days — a real product roadmap.
+
+| Release | Theme | Status |
+|---|---|---|
+| Alpha-0.3 | Core engine (workspace · streaming · export) | ✅ shipped |
+| Alpha-0.4 | README synthesis (KnowledgeGraph, ADR-0007) | ✅ shipped |
+| Alpha-0.5 | ADR generation | next |
+| Alpha-0.6 | GitHub integration (push) | planned |
+| Alpha-0.7 | Authentication | planned |
+| Alpha-0.8 | Cloud persistence | planned |
+| Alpha-0.9 | Collaboration | planned |
+| v1.0 | Public launch | planned |
+
 ## Sequencing principle
 
 Each horizon is a complete, demonstrable product — never a half-built bridge to the next.

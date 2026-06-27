@@ -5,7 +5,7 @@ import { cn } from "@/lib/cn";
 const ITEMS: { type: string; label: string; enabled: boolean }[] = [
   { type: "vision", label: "Vision", enabled: true },
   { type: "prd", label: "PRD", enabled: true },
-  { type: "readme", label: "README", enabled: false },
+  { type: "readme", label: "README", enabled: true },
   { type: "adr", label: "ADR", enabled: false },
 ];
 

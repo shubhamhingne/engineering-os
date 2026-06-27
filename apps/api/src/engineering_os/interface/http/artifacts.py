@@ -12,13 +12,24 @@ from ...adapters.db.models import ArtifactVersion
 from ...modules.artifacts.service import ArtifactService
 from ...modules.generation.service import GenerationService
 from ...modules.projects.service import NotFoundError, ProjectService
+from ...modules.readme.service import ReadmeService
 from ...ports.ai_provider import AIProvider
 from .deps import get_db, get_provider
-from .schemas import ArtifactSave, ArtifactVersionOut, VersionSummaryOut
+from .schemas import ArtifactSave, ArtifactVersionOut, ReadmeQualityOut, VersionSummaryOut
 
 router = APIRouter(prefix="/api/v1")
 
-SUPPORTED_TYPES = {"vision", "prd"}  # MVP scope; readme/adr arrive in later slices
+SUPPORTED_TYPES = {"vision", "prd", "readme"}
+STREAMABLE_TYPES = {"vision", "prd"}  # README is synthesized (deterministic), not streamed
+
+
+def _present_artifacts(artifacts: ArtifactService, project_id: str) -> dict[str, str]:
+    present: dict[str, str] = {}
+    for t in artifacts.types_present(project_id):
+        current = artifacts.current(project_id, t)
+        if current is not None:
+            present[t] = current.content
+    return present
 
 
 def _require_type(artifact_type: str) -> None:
@@ -55,6 +66,14 @@ def generate_artifact(
     project = _require_project(db, project_id)
     artifacts = ArtifactService(db)
 
+    # README is synthesized from the project's KnowledgeGraph, not a single prompt.
+    if artifact_type == "readme":
+        present = _present_artifacts(artifacts, project_id)
+        if "vision" not in present:
+            raise HTTPException(status_code=409, detail="generate the Vision before the README")
+        content, _prov, _score, _missing = ReadmeService().synthesize(project.title, project.idea, present)
+        return _out("readme", artifacts.add_version(project_id, "readme", content, "ai", "synthesis"))
+
     if artifact_type == "vision":
         context = {"idea": project.idea}
     else:  # prd is generated from the project's Vision
@@ -70,6 +89,14 @@ def generate_artifact(
     return _out(artifact_type, artifacts.add_version(project_id, artifact_type, result.content, "ai", result.model))
 
 
+@router.get("/projects/{project_id}/artifacts/readme/quality", response_model=ReadmeQualityOut)
+def readme_quality(project_id: str, db: Session = Depends(get_db)) -> ReadmeQualityOut:
+    project = _require_project(db, project_id)
+    present = _present_artifacts(ArtifactService(db), project_id)
+    score, missing, provenance = ReadmeService().assess(project.title, project.idea, present)
+    return ReadmeQualityOut(score=score, missing=missing, provenance=provenance)
+
+
 def _sse(event: str, data: dict) -> str:
     return f"event: {event}\ndata: {json.dumps(data)}\n\n"
 
@@ -82,6 +109,8 @@ def stream_artifact(
     provider: AIProvider = Depends(get_provider),
 ) -> StreamingResponse:
     _require_type(artifact_type)
+    if artifact_type not in STREAMABLE_TYPES:
+        raise HTTPException(status_code=400, detail=f"{artifact_type} is synthesized, not streamed")
     project = _require_project(db, project_id)
     artifacts = ArtifactService(db)
 

@@ -14,6 +14,7 @@ their own docs and linked here.
 | [0004](../02-architecture/adr/0004-artifact-abstraction.md) | Generalize VisionArtifact into a typed Artifact |
 | [0005](../02-architecture/adr/0005-streaming-generation.md) | Streaming generation over SSE |
 | [0006](../02-architecture/adr/0006-export-pipeline.md) | Export as an observable pipeline (ExportJob) |
+| [0007](../02-architecture/adr/0007-knowledge-synthesis.md) | KnowledgeGraph synthesis + three-layer AI provenance |
 
 New ADRs use the
 [template](https://github.com/shubhamhingne/.github/blob/main/docs/adr/0000-template.md).

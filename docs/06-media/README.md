@@ -20,6 +20,17 @@ integration, e2e) and a live run.
    "provider":"fake","model":"fake-1","tokens_in":11,"tokens_out":74,"latency_ms":0}
   ```
 
+## Day 14 / Alpha-0.4 — Intelligent README synthesis
+
+README **synthesized from a KnowledgeGraph** ([ADR-0007](../02-architecture/adr/0007-knowledge-synthesis.md)),
+not concatenated — semantic, provenance-tracked, and quality-scored. **24 tests passing.**
+
+- **Semantic (captured):** idea mentions *authentication* + *FastAPI* → README contains both.
+- **Sections (synthesized):** Hero · Problem · Solution · Features · Architecture · Tech Stack ·
+  Getting Started · Roadmap · Documentation · Contributing · License.
+- **Quality score:** `80/100` · missing `Architecture · Roadmap · Screenshots`.
+- **Provenance (three layers):** `Problem ← vision · Features ← prd · Tech Stack ← vision, prd`.
+
 ## Day 13 — Project Export Pipeline
 
 Export modeled as an observable `ExportJob` ([ADR-0006](../02-architecture/adr/0006-export-pipeline.md)),

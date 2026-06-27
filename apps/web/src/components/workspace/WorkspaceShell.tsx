@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { Search, Sparkles } from "lucide-react";
-import { streamArtifact, type ArtifactType } from "@/lib/api";
+import { api, streamArtifact, type ArtifactType, type ReadmeQuality } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { fadeRise } from "@/lib/motion";
 import { useWorkspace } from "./useWorkspace";
@@ -43,6 +43,15 @@ export function WorkspaceShell({ projectId }: { projectId: string }) {
   const [stage, setStage] = useState(6);
   const [actionError, setActionError] = useState<string | null>(null);
   const [exportMode, setExportMode] = useState(false);
+  const [quality, setQuality] = useState<ReadmeQuality | null>(null);
+
+  useEffect(() => {
+    if (ws.type === "readme" && ws.artifact) {
+      api.readmeQuality(projectId).then(setQuality).catch(() => setQuality(null));
+    } else {
+      setQuality(null);
+    }
+  }, [ws.type, ws.artifact, projectId]);
 
   const saved = ws.artifact?.content ?? "";
 
@@ -54,6 +63,20 @@ export function WorkspaceShell({ projectId }: { projectId: string }) {
   }, [saved, ws.type, generating]);
 
   async function handleGenerate(type: ArtifactType = ws.type) {
+    // README is synthesized (deterministic), not streamed.
+    if (type === "readme") {
+      setGenerating(true);
+      setActionError(null);
+      try {
+        await api.generateArtifact(projectId, "readme");
+        await ws.selectType("readme");
+      } catch (e) {
+        setActionError((e as Error).message);
+      } finally {
+        setGenerating(false);
+      }
+      return;
+    }
     if (type !== ws.type) await ws.selectType(type);
     setGenerating(true);
     setActionError(null);
@@ -106,6 +129,7 @@ export function WorkspaceShell({ projectId }: { projectId: string }) {
     { id: "home", label: "Go to Projects", group: "Navigate", shortcut: "⌘H", run: () => router.push("/") },
     { id: "gen-vision", label: "Generate Vision", group: "Actions", run: () => void handleGenerate("vision") },
     { id: "gen-prd", label: "Generate PRD", group: "Actions", run: () => void handleGenerate("prd") },
+    { id: "gen-readme", label: "Generate README", group: "Actions", run: () => void handleGenerate("readme") },
     { id: "save", label: "Save artifact", group: "Actions", shortcut: "⌘S", enabled: dirty, run: () => void handleSave() },
     { id: "export", label: "Export project", group: "Actions", run: () => setExportMode(true) },
     { id: "open-vision", label: "Open Vision", group: "Artifacts", run: () => void ws.selectType("vision") },
@@ -156,6 +180,14 @@ export function WorkspaceShell({ projectId }: { projectId: string }) {
               >
                 v{ws.artifact.version} · {ws.artifact.source}
               </motion.span>
+            )}
+            {ws.type === "readme" && quality && (
+              <span
+                title={`Missing: ${quality.missing.join(", ") || "nothing"}`}
+                className="rounded-full border border-accent/40 px-2 py-0.5 font-mono text-[11px] text-accent"
+              >
+                README {quality.score}/100
+              </span>
             )}
             <div className="ml-auto flex items-center gap-2">
               <ArtifactTabs value={view} onChange={setView} />

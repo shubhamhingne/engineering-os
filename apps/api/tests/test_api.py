@@ -20,7 +20,7 @@ def test_create_validation_rejects_empty(client):
 
 def test_unsupported_artifact_type_404(client):
     project_id = _new_project(client)
-    assert client.post(f"/api/v1/projects/{project_id}/artifacts/readme").status_code == 404
+    assert client.post(f"/api/v1/projects/{project_id}/artifacts/adr").status_code == 404
 
 
 def test_prd_requires_vision_409(client):
