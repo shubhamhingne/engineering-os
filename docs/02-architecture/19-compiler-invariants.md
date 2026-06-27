@@ -17,6 +17,7 @@ introducing a new one — explicitly, in an ADR.
 | 8 | **Explainability is explicit.** It is a first-class compiler output (`ExplanationGraph`), not a convenience method. | `ExplanationExtractor → ExplanationGraph` ([ADR-0011](adr/0011-explainability-compiler-passes.md)) |
 | 9 | **Every compile is observable.** A run yields a `CompilationReport` — the build log of what ran, produced, and reused. | `CompilationReport` ([ADR-0013](adr/0013-typed-compiler-context.md)) |
 | 10 | **Every run is fingerprinted.** The report pins not just the inputs but the compiler configuration that produced them, and each pass records why it ran. | `compute_fingerprint` + per-pass hashing ([ADR-0014](adr/0014-compiler-fingerprint-and-dependency-graph.md)) |
+| 11 | **Every produced slot has exactly one producer.** Ownership of compiler state is unambiguous — no two passes write the same `ContextKey`. | `validate_pipeline` duplicate-producer check ([ADR-0013](adr/0013-typed-compiler-context.md), [ADR-0014](adr/0014-compiler-fingerprint-and-dependency-graph.md)) |
 
 ## The rule
 

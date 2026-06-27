@@ -18,6 +18,8 @@ from ..explain.service import ExplanationExtractor, ExplanationGraph
 from ..knowledge.service import KnowledgeExtractor, KnowledgeGraph
 from ..publish.publishers import GitHubPublisher, ZipPublisher
 from ..render.renderers import ArtifactBundle, RenderContext, RendererRegistry
+from ..repository.service import RepositoryState, build_repository_state
+from ...ports.repository import RepositoryReader
 from .context import CompilationReport, CompilerContext, ContextKey, PassResult
 from .graph import build_dependency_graph
 
@@ -31,9 +33,9 @@ KNOWLEDGE = ContextKey("knowledge", KnowledgeGraph)
 DECISIONS = ContextKey("decisions", DecisionGraph)
 BUNDLE = ContextKey("bundle", ArtifactBundle)
 EXPLANATIONS = ContextKey("explanations", ExplanationGraph)
+REPOSITORY_STATE = ContextKey("repository_state", RepositoryState)
 
 SEED_KEYS = (TITLE, IDEA, SOURCES)
-GRAPH_KEYS = (KNOWLEDGE, DECISIONS, BUNDLE, EXPLANATIONS)
 
 
 @dataclass(frozen=True)
@@ -89,6 +91,25 @@ class ExplainPass:
         return {EXPLANATIONS: graph}
 
 
+class RepositorySyncPass:
+    """Observe the remote and produce a RepositoryState. The one pass that touches remote state — so
+    it is neither deterministic nor cacheable (the remote can change between runs). The credential is
+    *configuration* injected at the boundary via the reader, never a context slot, so secrets never
+    enter the hashed symbol table. This pass only observes; it makes no publishing decision (ADR-0015)."""
+
+    descriptor = PassDescriptor("repository_sync", 1, (BUNDLE,), (REPOSITORY_STATE,), False, False)
+
+    def __init__(self, reader: RepositoryReader, repository: str) -> None:
+        self._reader = reader
+        self._repository = repository
+
+    def run(self, ctx: CompilerContext) -> dict:
+        bundle = ctx.get(BUNDLE)
+        local_hashes = {a.path: a.hash for a in bundle.artifacts}
+        snapshot = self._reader.read_state(self._repository)
+        return {REPOSITORY_STATE: build_repository_state(self._repository, local_hashes, snapshot)}
+
+
 # --- Hashing: of values, of slot sets, and of the whole compiler configuration --------------------
 
 def _canonical(value) -> str:
@@ -108,6 +129,10 @@ def _hash_slots(ctx: CompilerContext, keys) -> str:
 def compute_fingerprint(passes, seed_keys=SEED_KEYS) -> str:
     """Hash the compiler *configuration* — not the inputs. Answers "did the compiler itself change?"
     so identical project inputs producing different outputs after an upgrade is explainable."""
+    produced_types = {k.name: k.type for p in passes for k in p.descriptor.produces}
+    schema_versions = {
+        name: t.schema_version for name, t in produced_types.items() if hasattr(t, "schema_version")
+    }
     payload = {
         "compiler_version": COMPILER_VERSION,
         "passes": [
@@ -115,7 +140,7 @@ def compute_fingerprint(passes, seed_keys=SEED_KEYS) -> str:
              [k.name for k in p.descriptor.consumes], [k.name for k in p.descriptor.produces]]
             for p in passes
         ],
-        "schema_versions": {k.name: getattr(k.type, "schema_version", None) for k in GRAPH_KEYS},
+        "schema_versions": schema_versions,
         "renderers": RendererRegistry().renderer_names(),
         "publishers": [ZipPublisher.name, GitHubPublisher.name],
     }
@@ -245,6 +270,12 @@ class Compiler:
             warnings=list(ctx.warnings),
             duration_ms=total_ms,
         )
+        # The remote-synchronization section: when a sync pass produced a RepositoryState, the report
+        # surfaces the published commit and sync status it observed. Pure enrichment — no pass changes.
+        if ctx.has(REPOSITORY_STATE):
+            state = ctx.get(REPOSITORY_STATE)
+            report.commit_sha = state.published_commit
+            report.publisher_result = state.sync_status
         return CompilationResult(ctx, report)
 
 
@@ -266,3 +297,12 @@ def compile_project(
 
 def run_explain_pipeline(title: str, idea: str, sources: dict) -> ExplanationGraph:
     return compile_project(title, idea, sources).context.get(EXPLANATIONS)
+
+
+# --- The synchronization pipeline (Alpha-0.9) -----------------------------------------------------
+# BuildPass is reused unchanged; RepositorySyncPass is the only addition. The reader (carrying the
+# credential) is injected at the boundary, so the compiler still never sees identity.
+
+def compile_sync(title: str, idea: str, sources: dict, reader: RepositoryReader, repository: str) -> CompilationResult:
+    compiler = Compiler((BuildPass(), RepositorySyncPass(reader, repository)))
+    return compiler.run({TITLE: title, IDEA: idea, SOURCES: sources})

@@ -10,6 +10,7 @@ from .interface.http.compiler import router as compiler_router
 from .interface.http.explain import router as explain_router
 from .interface.http.exports import router as exports_router
 from .interface.http.projects import router as projects_router
+from .interface.http.sync import router as sync_router
 from .observability import setup_logging
 
 
@@ -36,6 +37,7 @@ def create_app() -> FastAPI:
     app.include_router(exports_router)
     app.include_router(explain_router)
     app.include_router(compiler_router)
+    app.include_router(sync_router)
     return app
 
 

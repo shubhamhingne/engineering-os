@@ -127,6 +127,18 @@ class CompilerPipelineOut(BaseModel):
     unreachable: list[str]
 
 
+class RepositoryStateOut(BaseModel):
+    repository: str
+    default_branch: str
+    published_commit: Optional[str] = None
+    remote_artifact_hashes: dict[str, str]
+    sync_status: str
+    pending_artifacts: list[str]
+    last_sync: Optional[str] = None
+    remote_fingerprint: Optional[str] = None
+    diagnostics: list[str]
+
+
 class BuildPlanItemOut(BaseModel):
     renderer: str
     build: bool

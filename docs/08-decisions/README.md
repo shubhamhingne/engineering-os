@@ -22,6 +22,7 @@ their own docs and linked here.
 | [0012](../02-architecture/adr/0012-identity-federation-boundary.md) | Identity, GitHub federation, and the compiler boundary (CredentialProvider) |
 | [0013](../02-architecture/adr/0013-typed-compiler-context.md) | Typed CompilerContext — symbol table, startup validator, CompilationReport |
 | [0014](../02-architecture/adr/0014-compiler-fingerprint-and-dependency-graph.md) | Compiler fingerprint, pass versions, and the dependency graph |
+| [0015](../02-architecture/adr/0015-repository-state-sync-pass.md) | RepositoryState and the RepositorySyncPass (GitHub as synchronization) |
 
 New ADRs use the
 [template](https://github.com/shubhamhingne/.github/blob/main/docs/adr/0000-template.md).

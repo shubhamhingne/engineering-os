@@ -41,6 +41,24 @@ which is itself one of the lessons. These are reflections, not achievements.
   each was wrong for the MVP. Reaching for sophistication before the simple version is proven is a
   common senior-engineer trap I had to actively resist.
 
+## Release retrospective — Alpha-0.9 (repository synchronization)
+
+1. **What user problem did this solve?** "Is what I published current?" The system can now observe the
+   remote and report `in_sync` / `ahead` / `unpublished`, with the exact set of pending artifacts —
+   GitHub as *synchronization*, not fire-and-forget upload.
+2. **What architectural decision made it possible?** Modelling `RepositoryState` as the remote
+   analogue of `CompilationReport` — *state of publication*, transport-independent — and adding a
+   single `RepositorySyncPass` that only *observes* (the planner still decides what to build, the
+   publisher how to transmit) ([ADR-0015](../02-architecture/adr/0015-repository-state-sync-pass.md)).
+   The credential rides in the reader as configuration, so it never enters the hashed symbol table.
+3. **What trade-off did I consciously accept?** I deliberately constrained the release to *pure
+   addition* — one `ContextKey`, one pass, one report section, zero edits to existing passes — even
+   where a small edit would have been convenient. `last_sync` and `remote_fingerprint` ship as honest
+   placeholders rather than half-built features.
+4. **If I rebuilt this in a year, what would I change?** Nothing about the shape. The fact that this
+   landed as addition — the explain pipeline's fingerprint is byte-for-byte identical before and after
+   — is the result I was testing for: the architecture extends instead of entangling.
+
 ## Release retrospective — Alpha-0.8.y (compiler self-knowledge)
 
 1. **What user problem did this solve?** Reproducibility and trust. The compiler can now answer not

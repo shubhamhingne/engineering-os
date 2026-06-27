@@ -20,6 +20,22 @@ integration, e2e) and a live run.
    "provider":"fake","model":"fake-1","tokens_in":11,"tokens_out":74,"latency_ms":0}
   ```
 
+## Alpha-0.9 — Repository synchronization (GitHub as sync, not upload)
+
+`RepositoryState` — the remote analogue of `CompilationReport` — and a single `RepositorySyncPass`
+that *observes* the remote ([ADR-0015](../02-architecture/adr/0015-repository-state-sync-pass.md)).
+**70 tests passing.**
+
+- **Pure addition (captured):** the explain pipeline's fingerprint is **`0a6d1191545e` before and
+  after** this release — every existing pass is byte-for-byte unchanged. The sync pipeline
+  (`build → repository_sync`) has its own fingerprint `1af10cfb1917`.
+- **Sync status (captured):** `unpublished` (remote absent, 5 pending) · `in_sync` (hashes match,
+  commit surfaced) · `ahead` (local differs → pending set). The status flows into the build log
+  (`report.publisher_result`).
+- **Boundaries held:** `RepositorySyncPass` is the one pass that is **neither deterministic nor
+  cacheable** (it reads live remote state); the credential rides in the reader as configuration, so
+  it never enters the hashed symbol table; the pass only observes — it makes no publishing decision.
+
 ## Alpha-0.8.y — Compiler self-knowledge (fingerprint · pass versions · dependency graph)
 
 The compiler can now describe and explain *itself* ([ADR-0014](../02-architecture/adr/0014-compiler-fingerprint-and-dependency-graph.md)).

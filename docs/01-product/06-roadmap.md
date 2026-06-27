@@ -74,8 +74,8 @@ Tracked as releases, not days — a real product roadmap.
 | Alpha-0.8 | Identity · Authorization · Federation — GitHub OAuth (ADR-0012) | ✅ shipped |
 | Alpha-0.8.x | Typed `CompilerContext` — symbol table · startup validator · build log (ADR-0013) | ✅ shipped |
 | Alpha-0.8.y | Compiler self-knowledge — fingerprint · pass versions · dependency graph (ADR-0014) | ✅ shipped |
-| Alpha-0.9 | Repository synchronization — `RepositorySyncPass` + `RepositoryState` | next |
-| v1.0 | Dependency-driven pass scheduling · AI-backed passes · collaboration | planned |
+| Alpha-0.9 | Repository synchronization — `RepositorySyncPass` + `RepositoryState` (ADR-0015) | ✅ shipped |
+| v1.0 | DAG scheduling · pass-output caching · AI-backed passes · compiler replay · collaboration | planned |
 
 ## Sequencing principle
 

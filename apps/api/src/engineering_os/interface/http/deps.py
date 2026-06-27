@@ -95,3 +95,16 @@ def get_github_client(credentials: CredentialProvider = Depends(get_credential_p
     from ...modules.publish.github import RealGitHubClient
 
     return RealGitHubClient(token)
+
+
+def get_repository_reader(credentials: CredentialProvider = Depends(get_credential_provider)):
+    """Build the read-only remote reader from the session credential. The reader carries the token,
+    so `RepositorySyncPass` receives a capability, not OAuth — the compiler still never sees identity.
+    Returns None when no credential is available."""
+    try:
+        token = credentials.get_publishing_credential("github")
+    except MissingCredentialError:
+        return None
+    from ...adapters.repository.github import GitHubRepositoryReader
+
+    return GitHubRepositoryReader(token)
