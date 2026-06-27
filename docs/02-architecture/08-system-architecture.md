@@ -20,6 +20,10 @@ These constrain every decision below. A design that violates one is rejected.
    single port. Adding or swapping a provider is a configuration/adapter change, never a
    redesign. No vendor lock-in.
 
+As the system matured into a semantic compiler, these principles were sharpened into a set of
+[compiler invariants](19-compiler-invariants.md) — the properties every feature must preserve (the
+compiler never knows the user, renderers never publish, passes declare their dependencies, …).
+
 ## Architecture style
 
 A **modular monolith** with a **hexagonal (ports & adapters)** core. One deployable backend,
