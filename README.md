@@ -1,8 +1,12 @@
 <div align="center">
   <h1>Engineering OS</h1>
-  <p><em>An AI-powered workspace that turns an idea into a production-grade, interview-worthy repository.</em></p>
+  <p><em>A semantic compiler for software projects.</em></p>
+  <p>It transforms structured project knowledge into engineering artifacts through a typed,
+  dependency-driven compilation pipeline — with explicit planning, provenance, incremental
+  execution, immutable build identity, and transport-independent publication.</p>
   <p>
-    <strong>Status:</strong> Foundation complete · Implementation begins next ·
+    <strong>Status:</strong> <strong>v1.0</strong> — compiler model frozen ·
+    <a href="docs/02-architecture/20-compiler-specification.md">specification</a> is the contract ·
     Built on the <a href="https://github.com/shubhamhingne/.github">org engineering standards</a>
   </p>
 </div>

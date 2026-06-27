@@ -18,7 +18,7 @@ def create_app() -> FastAPI:
     setup_logging()
     init_db()
 
-    app = FastAPI(title="Engineering OS API", version="0.1.0")
+    app = FastAPI(title="Engineering OS API", version="1.0.0")
     app.add_middleware(
         CORSMiddleware,
         allow_origins=[o.strip() for o in settings.cors_origins.split(",")],

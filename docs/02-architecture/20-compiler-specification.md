@@ -8,6 +8,27 @@ bug.
 It is written to be teachable. The test of success: a senior engineer who reads this should be able
 to predict *where a new capability belongs* before reading a line of the implementation.
 
+- **Status:** v1.0 — **frozen contract.** The compiler model changes only through a deliberate,
+  versioned amendment (see *Governance* below). · **Compiler version:** `1.0`
+
+## Governance
+
+As of v1.0 the specification governs the implementation, not the other way around. Every proposed
+compiler change answers one question *before any code is written*:
+
+> **Does this change the specification, or only the implementation?**
+
+- **Specification change** (a model, invariant, identity rule, or extension contract changes): update
+  this document, write an ADR with the rationale, revisit the affected
+  [invariants](19-compiler-invariants.md), and consider the compiler-version implications (the
+  fingerprint will move). Rare and deliberate.
+- **Implementation change** (anything else — performance, refactors, new pass/renderer/publisher
+  *implementations* behind existing contracts): this document is untouched, and the observable
+  behavior must still satisfy the same contract.
+
+The compiler core is frozen under this rule. New capability arrives as *implementation* through the
+extension model (Part V); the *model* moves only when an invariant must.
+
 ---
 
 ## Part I — Mental model

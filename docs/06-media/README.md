@@ -20,6 +20,19 @@ integration, e2e) and a live run.
    "provider":"fake","model":"fake-1","tokens_in":11,"tokens_out":74,"latency_ms":0}
   ```
 
+## v1.0 — Semantic compiler released (model frozen)
+
+The compiler model is **frozen**, **specified**, and **property-tested**. The compiler version is set
+to `1.0`, which moves the fingerprint to its v1.0 value. **95 tests passing.**
+
+- **v1.0 captures:** explain-pipeline fingerprint `50d50ff3b2b8` · sample manifest hash `e8bd77ec6771`
+  (compiler version `1.0`). *(Pre-v1.0 captures above were taken at compiler version `0.8.y`; the
+  version is a fingerprint input, so those values are historical by design.)*
+- **Governance:** the [specification](../02-architecture/20-compiler-specification.md#governance) now
+  governs the implementation — every change answers *"spec or implementation?"* before any code.
+- **Repository relabelled:** *"A semantic compiler for software projects"* — AI is an implementation
+  within the compiler, not the architecture.
+
 ## v1.0-α5 — The compiler specification (teachability)
 
 One document that defines the whole model as a *language specification* — what any implementation must

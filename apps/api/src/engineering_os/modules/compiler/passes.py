@@ -24,7 +24,7 @@ from .cache import PassCache
 from .context import CompilationReport, CompilerContext, ContextKey, ExecutionPlan, PassResult
 from .graph import build_dependency_graph
 
-COMPILER_VERSION = "0.8.y"
+COMPILER_VERSION = "1.0"
 
 # --- The symbol-table keys (typed slot identifiers) -----------------------------------------------
 TITLE = ContextKey("title", str)

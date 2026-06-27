@@ -80,9 +80,23 @@ Tracked as releases, not days — a real product roadmap.
 | v1.0-α3 | `BuildManifest` — immutable, content-addressed compilation identity (ADR-0018) | ✅ shipped |
 | v1.0-α4 | Compiler hardening — property-based invariant testing, Hypothesis (ADR-0019) | ✅ shipped |
 | v1.0-α5 | Compiler specification — the whole model as a teachable language spec | ✅ shipped |
-| v1.0-α6 | AI-backed pass implementations — behind `CompilerPass`, deterministic fallback | next |
-| v1.0-α7 | Compiler replay — reconstruct execution from the manifest | planned |
-| v1.0 | Public launch | planned |
+| **v1.0** | **Semantic compiler — model frozen, specified, property-tested** | **✅ released** |
+
+## After v1.0 — two tracks
+
+The compiler core is **frozen** ([governance](../02-architecture/20-compiler-specification.md#governance)):
+the model changes only through a deliberate, versioned amendment. Future work splits in two.
+
+**Track A — Product** (consumes the compiler, never redefines it): richer web workspace, publishing
+UX, visualization, onboarding, integrations, and collaboration when ready.
+
+**Track B — Research** (experiments about the model, with honest outcomes — not roadmap items):
+
+| Question | What a "yes" would prove |
+|---|---|
+| Can deterministic and LLM implementations satisfy the same pass contract? | AI is an interchangeable *implementation*, measured by substitutability under `CompilerPass` — not by output quality. |
+| Can a `BuildManifest` reconstruct an engineering workspace? | The manifest is a reproducibility primitive, not just an audit record. |
+| Can different compiler implementations (Python · Rust · cloud) produce the same `manifest_hash`? | The specification is independent of any implementation. |
 
 ## Sequencing principle
 

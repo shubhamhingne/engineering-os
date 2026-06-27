@@ -41,6 +41,23 @@ which is itself one of the lessons. These are reflections, not achievements.
   each was wrong for the MVP. Reaching for sophistication before the simple version is proven is a
   common senior-engineer trap I had to actively resist.
 
+## Milestone — v1.0 (the semantic compiler)
+
+Engineering OS is released as **v1.0**: a semantic compiler for software projects, with its model
+**frozen**, **specified**, and **property-tested**. The repository's own description changed to match
+what it became — *"A semantic compiler for software projects"* — a sentence in which the word "AI"
+deliberately does not appear, because AI is one implementation strategy within the compiler, not the
+architecture.
+
+The journey crossed three thresholds: **capability** (generate engineering artifacts), **architecture**
+(a typed, dependency-driven semantic compiler with clear extension points), and **theory** (a
+specification that stands above any one implementation). v1.0 is declared because the third is done.
+
+From here the compiler core is governed by one rule: *does a change touch the specification, or only
+the implementation?* The model moves only when an invariant must. Everything else — product surfaces
+(Track A) and research questions like AI-pass substitutability and manifest-as-reproducibility
+(Track B) — builds on a stable contract rather than redefining it.
+
 ## Release retrospective — v1.0-α5 (the compiler specification)
 
 1. **What user problem did this solve?** Understandability. The compiler was coherent in code but only
