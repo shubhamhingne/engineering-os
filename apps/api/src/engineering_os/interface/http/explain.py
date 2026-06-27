@@ -52,6 +52,7 @@ def compilation_report(
     report = compile_project(project.title, project.idea, _sources(db, project.id)).report
     return CompilationReportOut(
         compiler_version=report.compiler_version,
+        fingerprint=report.fingerprint,
         schema_versions=report.schema_versions,
         passes_executed=[
             PassResultOut(
@@ -60,6 +61,9 @@ def compilation_report(
                 cache_hit=p.cache_hit,
                 inputs=p.inputs,
                 outputs=p.outputs,
+                input_hash=p.input_hash,
+                output_hash=p.output_hash,
+                invalidation_reason=p.invalidation_reason,
                 warnings=p.warnings,
                 errors=p.errors,
             )

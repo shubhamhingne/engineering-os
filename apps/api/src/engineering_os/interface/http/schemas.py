@@ -92,12 +92,16 @@ class PassResultOut(BaseModel):
     cache_hit: bool
     inputs: list[str]
     outputs: list[str]
+    input_hash: str
+    output_hash: str
+    invalidation_reason: str
     warnings: list[str]
     errors: list[str]
 
 
 class CompilationReportOut(BaseModel):
     compiler_version: str
+    fingerprint: str
     schema_versions: dict[str, str]
     passes_executed: list[PassResultOut]
     artifacts_generated: int
@@ -106,6 +110,21 @@ class CompilationReportOut(BaseModel):
     warnings: list[str]
     duration_ms: int
     commit_sha: Optional[str] = None
+
+
+class PipelineEdgeOut(BaseModel):
+    producer: str
+    consumer: str
+
+
+class CompilerPipelineOut(BaseModel):
+    fingerprint: str
+    compiler_version: str
+    nodes: list[str]
+    edges: list[PipelineEdgeOut]
+    mermaid: str
+    cycle: Optional[list[str]] = None
+    unreachable: list[str]
 
 
 class BuildPlanItemOut(BaseModel):

@@ -20,6 +20,30 @@ integration, e2e) and a live run.
    "provider":"fake","model":"fake-1","tokens_in":11,"tokens_out":74,"latency_ms":0}
   ```
 
+## Alpha-0.8.y — Compiler self-knowledge (fingerprint · pass versions · dependency graph)
+
+The compiler can now describe and explain *itself* ([ADR-0014](../02-architecture/adr/0014-compiler-fingerprint-and-dependency-graph.md)).
+**62 tests passing.**
+
+- **Fingerprint (captured):** `0a6d1191545e` — a hash of the whole compiler configuration (version,
+  pass `id+version+consumes+produces`, schema versions, renderer/publisher registries). Now "did the
+  inputs change?" and "did the *compiler* change?" are separable questions.
+- **Per-pass invalidation (captured):** cold build → `inputs unchanged (no pass cache yet)` →
+  `inputs changed since last compilation`, each with an `input_hash` / `output_hash`.
+- **Dependency graph (`GET /compiler/pipeline`, captured)** — built from descriptors; cycle-free,
+  fully reachable, visualizable:
+  ```
+  graph TD
+    seed --> extract_knowledge
+    extract_knowledge --> extract_decision
+    seed --> build
+    extract_knowledge --> explain
+    extract_decision --> explain
+    seed --> explain
+    build --> explain
+  ```
+  Execution stays sequential; the v1.0 DAG scheduler consumes this same graph.
+
 ## Alpha-0.8.x — The typed compiler (symbol table · validator · build log)
 
 The `dict` context became the compiler's **symbol table**: typed `ContextKey` slots, a

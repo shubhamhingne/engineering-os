@@ -6,6 +6,7 @@ from .config import settings
 from .db import init_db
 from .interface.http.artifacts import router as artifacts_router
 from .interface.http.auth import router as auth_router
+from .interface.http.compiler import router as compiler_router
 from .interface.http.explain import router as explain_router
 from .interface.http.exports import router as exports_router
 from .interface.http.projects import router as projects_router
@@ -34,6 +35,7 @@ def create_app() -> FastAPI:
     app.include_router(artifacts_router)
     app.include_router(exports_router)
     app.include_router(explain_router)
+    app.include_router(compiler_router)
     return app
 
 

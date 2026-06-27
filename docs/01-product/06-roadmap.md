@@ -73,6 +73,7 @@ Tracked as releases, not days — a real product roadmap.
 | Alpha-0.7 | Explainability — `ExplanationGraph` + `CompilerPass` pipeline (ADR-0011) | ✅ shipped |
 | Alpha-0.8 | Identity · Authorization · Federation — GitHub OAuth (ADR-0012) | ✅ shipped |
 | Alpha-0.8.x | Typed `CompilerContext` — symbol table · startup validator · build log (ADR-0013) | ✅ shipped |
+| Alpha-0.8.y | Compiler self-knowledge — fingerprint · pass versions · dependency graph (ADR-0014) | ✅ shipped |
 | Alpha-0.9 | Repository synchronization — `RepositorySyncPass` + `RepositoryState` | next |
 | v1.0 | Dependency-driven pass scheduling · AI-backed passes · collaboration | planned |
 

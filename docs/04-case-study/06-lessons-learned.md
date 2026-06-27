@@ -41,6 +41,25 @@ which is itself one of the lessons. These are reflections, not achievements.
   each was wrong for the MVP. Reaching for sophistication before the simple version is proven is a
   common senior-engineer trap I had to actively resist.
 
+## Release retrospective — Alpha-0.8.y (compiler self-knowledge)
+
+1. **What user problem did this solve?** Reproducibility and trust. The compiler can now answer not
+   just "did the inputs change?" but "did the *compiler* change?" — and every pass can say *why* it
+   ran. When identical inputs produce different outputs after an upgrade, that's now explainable.
+2. **What architectural decision made it possible?** A `CompilerFingerprint` hashing the whole
+   configuration (compiler version, every pass's `id+version+consumes+produces`, schema versions,
+   renderer/publisher registries), `version` on each `PassDescriptor`, per-pass input/output hashes
+   with an `invalidation_reason`, and the dependency graph built from descriptors as a *validation
+   artifact* — cycle detection, reachability, visualization — with execution still sequential
+   ([ADR-0014](../02-architecture/adr/0014-compiler-fingerprint-and-dependency-graph.md)).
+3. **What trade-off did I consciously accept?** I built the DAG but did **not** schedule on it — it's
+   diagnostics today, the scheduler's input tomorrow. And `cache_hit` stays inert and
+   `invalidation_reason` reads "cold build" until reports are persisted — honest about what isn't
+   there yet, rather than faking a cache.
+4. **If I rebuilt this in a year, what would I change?** Nothing — this is the same trajectory every
+   release has followed: move correctness earlier. Hashes → diff, strings → typed keys, runtime →
+   startup, and now opaque runs → fingerprinted, self-explaining ones.
+
 ## Release retrospective — Alpha-0.8.x (the typed compiler)
 
 1. **What user problem did this solve?** Indirectly but importantly: trust in the engine. The

@@ -1,22 +1,27 @@
-"""Compiler passes, the well-formedness validator, and the Compiler (ADR-0011, ADR-0013).
+"""Compiler passes, the well-formedness validator, fingerprinting, and the Compiler
+(ADR-0011, ADR-0013, ADR-0014).
 
-Every transformation is a pass that exposes a `PassDescriptor` (id, typed consumes/produces,
-deterministic, cacheable) and a `run(ctx)` that reads typed slots and returns produced slots. The
-descriptor is the single source of truth: the **startup validator** uses it to prove the pipeline
-is well-formed *before any work runs*, and a future DAG scheduler will consume the very same
-descriptors — so the migration from sequential to scheduled needs no pass to change.
+Every transformation is a pass exposing a versioned `PassDescriptor` (id, version, typed
+consumes/produces, deterministic, cacheable) and a `run(ctx)`. The descriptor is the single source
+of truth: the startup validator proves the pipeline well-formed (and acyclic) before any work runs;
+the fingerprint hashes the whole compiler configuration so a run records *which compiler* produced
+it; and a future DAG scheduler consumes the same descriptors unchanged.
 """
+import hashlib
+import json
 import time
-from dataclasses import dataclass
-from typing import Protocol
+from dataclasses import asdict, dataclass, is_dataclass
+from typing import Optional, Protocol
 
 from ..decision.service import DecisionExtractor, DecisionGraph
 from ..explain.service import ExplanationExtractor, ExplanationGraph
 from ..knowledge.service import KnowledgeExtractor, KnowledgeGraph
+from ..publish.publishers import GitHubPublisher, ZipPublisher
 from ..render.renderers import ArtifactBundle, RenderContext, RendererRegistry
 from .context import CompilationReport, CompilerContext, ContextKey, PassResult
+from .graph import build_dependency_graph
 
-COMPILER_VERSION = "0.8.x"
+COMPILER_VERSION = "0.8.y"
 
 # --- The symbol-table keys (typed slot identifiers) -----------------------------------------------
 TITLE = ContextKey("title", str)
@@ -28,11 +33,13 @@ BUNDLE = ContextKey("bundle", ArtifactBundle)
 EXPLANATIONS = ContextKey("explanations", ExplanationGraph)
 
 SEED_KEYS = (TITLE, IDEA, SOURCES)
+GRAPH_KEYS = (KNOWLEDGE, DECISIONS, BUNDLE, EXPLANATIONS)
 
 
 @dataclass(frozen=True)
 class PassDescriptor:
     id: str
+    version: int           # bump when a pass's algorithm changes — feeds the fingerprint & cache key
     consumes: tuple        # tuple[ContextKey, ...]
     produces: tuple        # tuple[ContextKey, ...]
     deterministic: bool    # same inputs → same outputs, no side effects
@@ -48,7 +55,7 @@ class CompilerPass(Protocol):
 
 
 class ExtractKnowledgePass:
-    descriptor = PassDescriptor("extract_knowledge", (TITLE, IDEA, SOURCES), (KNOWLEDGE,), True, True)
+    descriptor = PassDescriptor("extract_knowledge", 1, (TITLE, IDEA, SOURCES), (KNOWLEDGE,), True, True)
 
     def run(self, ctx: CompilerContext) -> dict:
         graph = KnowledgeExtractor().extract(ctx.get(TITLE), ctx.get(IDEA), ctx.get(SOURCES))
@@ -56,14 +63,14 @@ class ExtractKnowledgePass:
 
 
 class ExtractDecisionPass:
-    descriptor = PassDescriptor("extract_decision", (KNOWLEDGE,), (DECISIONS,), True, True)
+    descriptor = PassDescriptor("extract_decision", 1, (KNOWLEDGE,), (DECISIONS,), True, True)
 
     def run(self, ctx: CompilerContext) -> dict:
         return {DECISIONS: DecisionExtractor().extract(ctx.get(KNOWLEDGE))}
 
 
 class BuildPass:
-    descriptor = PassDescriptor("build", (TITLE, IDEA, SOURCES), (BUNDLE,), True, True)
+    descriptor = PassDescriptor("build", 1, (TITLE, IDEA, SOURCES), (BUNDLE,), True, True)
 
     def run(self, ctx: CompilerContext) -> dict:
         render_ctx = RenderContext(title=ctx.get(TITLE), idea=ctx.get(IDEA), artifacts=ctx.get(SOURCES))
@@ -72,7 +79,7 @@ class BuildPass:
 
 class ExplainPass:
     descriptor = PassDescriptor(
-        "explain", (KNOWLEDGE, DECISIONS, SOURCES, BUNDLE), (EXPLANATIONS,), True, True
+        "explain", 1, (KNOWLEDGE, DECISIONS, SOURCES, BUNDLE), (EXPLANATIONS,), True, True
     )
 
     def run(self, ctx: CompilerContext) -> dict:
@@ -82,41 +89,87 @@ class ExplainPass:
         return {EXPLANATIONS: graph}
 
 
-# --- Startup validation: prove the pipeline is well-formed before running anything ----------------
+# --- Hashing: of values, of slot sets, and of the whole compiler configuration --------------------
+
+def _canonical(value) -> str:
+    payload = asdict(value) if is_dataclass(value) else value
+    return json.dumps(payload, sort_keys=True, default=str)
+
+
+def _hash(text: str) -> str:
+    return hashlib.sha256(text.encode("utf-8")).hexdigest()[:12]
+
+
+def _hash_slots(ctx: CompilerContext, keys) -> str:
+    combined = {k.name: _hash(_canonical(ctx.get(k))) for k in keys}
+    return _hash(json.dumps(combined, sort_keys=True))
+
+
+def compute_fingerprint(passes, seed_keys=SEED_KEYS) -> str:
+    """Hash the compiler *configuration* — not the inputs. Answers "did the compiler itself change?"
+    so identical project inputs producing different outputs after an upgrade is explainable."""
+    payload = {
+        "compiler_version": COMPILER_VERSION,
+        "passes": [
+            [p.descriptor.id, p.descriptor.version,
+             [k.name for k in p.descriptor.consumes], [k.name for k in p.descriptor.produces]]
+            for p in passes
+        ],
+        "schema_versions": {k.name: getattr(k.type, "schema_version", None) for k in GRAPH_KEYS},
+        "renderers": RendererRegistry().renderer_names(),
+        "publishers": [ZipPublisher.name, GitHubPublisher.name],
+    }
+    return _hash(json.dumps(payload, sort_keys=True))
+
+
+# --- Startup validation: prove the pipeline is well-formed and acyclic before running anything -----
 
 class PipelineValidationError(Exception):
-    """The pipeline is ill-formed (missing/duplicate producer, or a type mismatch on a slot)."""
+    """The pipeline is ill-formed (missing/duplicate producer, type mismatch, cycle, or bad order)."""
 
 
 def validate_pipeline(passes, seed_keys=SEED_KEYS) -> None:
-    """Walk the passes in order and check the compiler itself is well-formed:
-      ✓ every consumed slot is produced by an earlier pass (or seeded)
-      ✓ a consumed slot's type matches how it is produced
-      ✓ no slot has two producers
-    (Cycle detection arrives with the DAG scheduler; a linear list cannot cycle.)"""
-    available: dict[str, ContextKey] = {k.name: k for k in seed_keys}
-    producers: dict[str, str] = {k.name: "<seed>" for k in seed_keys}
     errors: list[str] = []
 
+    # 1. Producer map over ALL passes — catches duplicates regardless of order.
+    producer_of: dict[str, str] = {k.name: "<seed>" for k in seed_keys}
+    key_type: dict[str, type] = {k.name: k.type for k in seed_keys}
     for p in passes:
-        d = p.descriptor
-        for c in d.consumes:
-            produced = available.get(c.name)
-            if produced is None:
-                errors.append(f"pass '{d.id}' consumes '{c.name}' but no earlier pass produces it")
-            elif produced.type is not c.type:
-                errors.append(
-                    f"pass '{d.id}' consumes '{c.name}' as {c.type.__name__} "
-                    f"but it is produced as {produced.type.__name__}"
-                )
-        for o in d.produces:
-            if o.name in producers:
-                errors.append(
-                    f"pass '{d.id}' produces '{o.name}', already produced by '{producers[o.name]}'"
-                )
+        for o in p.descriptor.produces:
+            if o.name in producer_of:
+                errors.append(f"pass '{p.descriptor.id}' produces '{o.name}', already produced by '{producer_of[o.name]}'")
             else:
-                producers[o.name] = d.id
-                available[o.name] = o
+                producer_of[o.name] = p.descriptor.id
+                key_type[o.name] = o.type
+
+    # 2. Every consumed slot must have a producer, with a matching type.
+    for p in passes:
+        for c in p.descriptor.consumes:
+            if c.name not in producer_of:
+                errors.append(f"pass '{p.descriptor.id}' consumes '{c.name}' but no pass produces it")
+            elif key_type[c.name] is not c.type:
+                errors.append(
+                    f"pass '{p.descriptor.id}' consumes '{c.name}' as {c.type.__name__} "
+                    f"but it is produced as {key_type[c.name].__name__}"
+                )
+
+    if not errors:
+        # 3. No cycles (a validation artifact today; real once passes form a true DAG).
+        cycle = build_dependency_graph(passes, seed_keys).find_cycle()
+        if cycle is not None:
+            errors.append("dependency cycle: " + " → ".join(cycle))
+
+        # 4. Sequential execution must be sound: each pass's inputs produced earlier in the list.
+        seen = {k.name for k in seed_keys}
+        for p in passes:
+            for c in p.descriptor.consumes:
+                if c.name not in seen:
+                    errors.append(
+                        f"pass '{p.descriptor.id}' consumes '{c.name}' before it is produced "
+                        f"(listed out of dependency order)"
+                    )
+            for o in p.descriptor.produces:
+                seen.add(o.name)
 
     if errors:
         raise PipelineValidationError("; ".join(errors))
@@ -130,13 +183,28 @@ class CompilationResult:
     report: CompilationReport
 
 
+def _invalidation_reason(pass_id: str, input_hash: str, previous: Optional[CompilationReport]) -> str:
+    if previous is None:
+        return "cold build (no prior compilation)"
+    prior = next((r for r in previous.passes_executed if r.pass_id == pass_id), None)
+    if prior is None:
+        return "new pass (absent from prior compilation)"
+    if prior.input_hash != input_hash:
+        return "inputs changed since last compilation"
+    return "inputs unchanged (no pass cache yet)"
+
+
 class Compiler:
     def __init__(self, passes, seed_keys=SEED_KEYS) -> None:
         self._passes = list(passes)
         self._seed_keys = tuple(seed_keys)
         validate_pipeline(self._passes, self._seed_keys)  # fail fast: an ill-formed pipeline never runs
 
-    def run(self, seed: dict) -> CompilationResult:
+    @property
+    def fingerprint(self) -> str:
+        return compute_fingerprint(self._passes, self._seed_keys)
+
+    def run(self, seed: dict, previous: Optional[CompilationReport] = None) -> CompilationResult:
         ctx = CompilerContext()
         for key, value in seed.items():
             ctx.set(key, value)
@@ -146,6 +214,8 @@ class Compiler:
         for p in self._passes:
             d = p.descriptor
             warned_before = len(ctx.warnings)
+            input_hash = _hash_slots(ctx, d.consumes)
+            reason = _invalidation_reason(d.id, input_hash, previous)
             start = time.perf_counter()
             produced = p.run(ctx)
             for key, value in produced.items():
@@ -157,6 +227,9 @@ class Compiler:
                     cache_hit=False,
                     inputs=[k.name for k in d.consumes],
                     outputs=[k.name for k in d.produces],
+                    input_hash=input_hash,
+                    output_hash=_hash_slots(ctx, d.produces),
+                    invalidation_reason=reason,
                     warnings=ctx.warnings[warned_before:],
                 )
             )
@@ -164,6 +237,7 @@ class Compiler:
 
         report = CompilationReport(
             compiler_version=COMPILER_VERSION,
+            fingerprint=self.fingerprint,
             schema_versions=ctx.schema_versions,
             passes_executed=results,
             artifacts_generated=len(ctx.get(BUNDLE).artifacts) if ctx.has(BUNDLE) else 0,
@@ -180,8 +254,14 @@ EXPLAIN_PIPELINE = (ExtractKnowledgePass(), ExtractDecisionPass(), BuildPass(), 
 _EXPLAIN_COMPILER = Compiler(EXPLAIN_PIPELINE)
 
 
-def compile_project(title: str, idea: str, sources: dict) -> CompilationResult:
-    return _EXPLAIN_COMPILER.run({TITLE: title, IDEA: idea, SOURCES: sources})
+def explain_compiler() -> Compiler:
+    return _EXPLAIN_COMPILER
+
+
+def compile_project(
+    title: str, idea: str, sources: dict, previous: Optional[CompilationReport] = None
+) -> CompilationResult:
+    return _EXPLAIN_COMPILER.run({TITLE: title, IDEA: idea, SOURCES: sources}, previous=previous)
 
 
 def run_explain_pipeline(title: str, idea: str, sources: dict) -> ExplanationGraph:

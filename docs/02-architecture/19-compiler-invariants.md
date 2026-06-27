@@ -16,6 +16,7 @@ introducing a new one — explicitly, in an ADR.
 | 7 | **Artifacts are hashed.** Every `RenderedArtifact` carries a content hash; diffing and incremental build follow. | Artifact hashing + `DiffEngine` ([ADR-0010](adr/0010-build-planner-diff.md)) |
 | 8 | **Explainability is explicit.** It is a first-class compiler output (`ExplanationGraph`), not a convenience method. | `ExplanationExtractor → ExplanationGraph` ([ADR-0011](adr/0011-explainability-compiler-passes.md)) |
 | 9 | **Every compile is observable.** A run yields a `CompilationReport` — the build log of what ran, produced, and reused. | `CompilationReport` ([ADR-0013](adr/0013-typed-compiler-context.md)) |
+| 10 | **Every run is fingerprinted.** The report pins not just the inputs but the compiler configuration that produced them, and each pass records why it ran. | `compute_fingerprint` + per-pass hashing ([ADR-0014](adr/0014-compiler-fingerprint-and-dependency-graph.md)) |
 
 ## The rule
 

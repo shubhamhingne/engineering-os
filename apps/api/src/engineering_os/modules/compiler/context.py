@@ -25,13 +25,18 @@ class ContextKey:
 @dataclass
 class PassResult:
     """What one pass did — the unit of the execution trace. Not a compiler output; compiler
-    metadata. `cache_hit` is always False today; it is the hook the pass-cache will set."""
+    metadata. The hashes and `invalidation_reason` extend the explainability philosophy from project
+    entities to the compiler itself: a pass can say *why* it ran. `cache_hit` is always False today;
+    it is the hook the pass-cache will set once outputs are memoized by `input_hash`."""
 
     pass_id: str
     duration_ms: int
     cache_hit: bool
     inputs: list[str]
     outputs: list[str]
+    input_hash: str = ""
+    output_hash: str = ""
+    invalidation_reason: str = ""
     warnings: list[str] = field(default_factory=list)
     errors: list[str] = field(default_factory=list)
 
@@ -43,6 +48,7 @@ class CompilationReport:
     publisher result) — those fields are present now and Optional, so the shape is stable."""
 
     compiler_version: str
+    fingerprint: str                        # hash of the compiler config that produced this run
     schema_versions: dict[str, str]
     passes_executed: list[PassResult]
     artifacts_generated: int
