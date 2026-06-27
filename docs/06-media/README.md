@@ -20,6 +20,24 @@ integration, e2e) and a live run.
    "provider":"fake","model":"fake-1","tokens_in":11,"tokens_out":74,"latency_ms":0}
   ```
 
+## Alpha-0.7 — Explainability (`ExplanationGraph` + compiler passes)
+
+The compiler can now explain itself ([ADR-0011](../02-architecture/adr/0011-explainability-compiler-passes.md)):
+`ExtractKnowledge → ExtractDecision → Build → Explain` runs as a literal sequence of `CompilerPass`es,
+emitting a typed `ExplanationGraph`. **43 tests passing.**
+
+- **Explanation (captured from the running pipeline)** — idea + Vision + PRD mention *authentication*
+  and *FastAPI*:
+
+  ```
+  tech:FastAPI          conf=0.98  sources=['prd','vision']  appears_in=['README.md','docs/ADR-0001.md','docs/prd.md','docs/vision.md']
+  topic:authentication  conf=0.98  sources=['prd','vision']  appears_in=['README.md','docs/ADR-0001.md','docs/prd.md','docs/vision.md']
+  ```
+- Each `Explanation` carries `entity_id · type · summary · evidence · sources · appears_in ·
+  related_decisions · confidence` — provenance, not prose. `GET /projects/{id}/explanations` exposes it.
+- **Semantic test:** *idea mentions authentication → Vision generated → explanation
+  `topic:authentication` has `vision` in sources and `README.md` in `appears_in`, confidence > 0.*
+
 ## Alpha-0.6.x — Incremental build pipeline (planner · hashing · diff)
 
 The compiler gained planning + change detection ([ADR-0010](../02-architecture/adr/0010-build-planner-diff.md)):
@@ -41,7 +59,7 @@ Export refactored into **renderers** (produce an explicit `ArtifactBundle`) and 
   `docs/prd.md` · `LICENSE` · `.gitignore`.
 - **Publishers:** `ZipPublisher` (real, download) · `GitHubPublisher` (behind a `GitHubClient`
   port; verified via a fake — `create_repo` + `commit_files` → repo URL + commit SHA). Real push
-  gated on a token (OAuth in Alpha-0.7).
+  gated on a token (OAuth in Alpha-0.8).
 - **Framing:** Project Knowledge → Semantic Compiler → Artifacts → Publishers (≈ source → compiler → binary).
 
 ## Alpha-0.5 — ADR generation (DecisionGraph)

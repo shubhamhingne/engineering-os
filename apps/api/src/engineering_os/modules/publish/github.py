@@ -1,4 +1,4 @@
-"""Real GitHub API client. Used only when a token is configured (Alpha-0.7 will add the user
+"""Real GitHub API client. Used only when a token is configured (Alpha-0.8 will add the user
 OAuth flow). Tests exercise the publisher via the fake client, so this is never hit in CI."""
 import base64
 

@@ -5,6 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from .config import settings
 from .db import init_db
 from .interface.http.artifacts import router as artifacts_router
+from .interface.http.explain import router as explain_router
 from .interface.http.exports import router as exports_router
 from .interface.http.projects import router as projects_router
 from .observability import setup_logging
@@ -29,6 +30,7 @@ def create_app() -> FastAPI:
     app.include_router(projects_router)
     app.include_router(artifacts_router)
     app.include_router(exports_router)
+    app.include_router(explain_router)
     return app
 
 

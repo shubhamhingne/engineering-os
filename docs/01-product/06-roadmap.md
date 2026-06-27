@@ -70,9 +70,10 @@ Tracked as releases, not days — a real product roadmap.
 | Alpha-0.5 | ADR generation (DecisionGraph, ADR-0008) | ✅ shipped |
 | Alpha-0.6 | Semantic build system + GitHub publisher (ADR-0009) | ✅ shipped |
 | Alpha-0.6.x | Incremental build pipeline — planner · hashing · diff (ADR-0010) | ✅ shipped |
-| Alpha-0.7 | Identity · Authorization · Federation (GitHub OAuth) | next |
-| Alpha-0.8 | Cloud persistence | planned |
-| Alpha-0.9 | Collaboration | planned |
+| Alpha-0.7 | Explainability — `ExplanationGraph` + `CompilerPass` pipeline (ADR-0011) | ✅ shipped |
+| Alpha-0.8 | Identity · Authorization · Federation (GitHub OAuth) | next |
+| Alpha-0.9 | Repository synchronization (`RepositoryState`) | planned |
+| Alpha-0.10 | Collaboration | planned |
 | v1.0 | Public launch | planned |
 
 ## Sequencing principle

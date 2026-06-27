@@ -13,7 +13,7 @@ class Settings(BaseSettings):
     anthropic_api_key: str = ""
     ai_model: str = "claude-sonnet-4-6"
 
-    # GitHub publishing (a real OAuth/user-token flow arrives in Alpha-0.7)
+    # GitHub publishing (a real OAuth/user-token flow arrives in Alpha-0.8)
     github_token: str = ""
 
 

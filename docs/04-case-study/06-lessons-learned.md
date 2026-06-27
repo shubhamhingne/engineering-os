@@ -41,6 +41,26 @@ which is itself one of the lessons. These are reflections, not achievements.
   each was wrong for the MVP. Reaching for sophistication before the simple version is proven is a
   common senior-engineer trap I had to actively resist.
 
+## Release retrospective — Alpha-0.7 (explainability + compiler passes)
+
+1. **What user problem did this solve?** Trust. The tool can now answer *"why is this here, and what
+   did it produce?"* for any entity — `authentication` was mentioned in the Vision, shaped README.md
+   and the ADR, relates to these decisions, confidence 0.7. A generator that can't explain itself is
+   a black box; this one shows its work.
+2. **What architectural decision made it possible?** Making explainability an explicit compiler
+   output — `ExplanationExtractor → ExplanationGraph` — rather than a `graph.explain()` convenience
+   method, and unifying every transformation under a `CompilerPass` contract (declared
+   inputs/outputs, deterministic, run over a shared context)
+   ([ADR-0011](../02-architecture/adr/0011-explainability-compiler-passes.md)). The pipeline is now a
+   literal *sequence of passes*: `ExtractKnowledge → ExtractDecision → Build → Explain`.
+3. **What trade-off did I consciously accept?** I built explainability *before* authentication —
+   against my own earlier sequencing — because authentication is table stakes and a semantic
+   explanation engine is part of the product's identity. And confidence is a heuristic (evidence
+   count), not a calibrated probability: honest and useful now, coarse by design.
+4. **If I rebuilt this in a year, what would I change?** Promote the shared `context: dict` to a typed
+   compiler context, cache `deterministic` passes by input hash, and link the diff back to the
+   explanation that changed — so the system records *why* an artifact regenerated, not just that it did.
+
 ## Release retrospective — Alpha-0.6.x (incremental build pipeline)
 
 1. **What user problem did this solve?** Not re-doing work that didn't change — and being able to

@@ -46,7 +46,7 @@ Neither touches the other, and neither touches a central pipeline.
 - (+) ZIP and GitHub publish the **same bundle** — the synthesized README/ADR now ship in the ZIP too.
 - (+) GitHub behind a client port → testable via a fake without touching the network.
 - (−) More abstraction than a single export function — justified by the growth ahead.
-- (−) The real GitHub push is gated on a token (Alpha-0.7 adds the user OAuth flow); proven here via
+- (−) The real GitHub push is gated on a token (Alpha-0.8 adds the user OAuth flow); proven here via
   the fake client.
 
 ## Consequences

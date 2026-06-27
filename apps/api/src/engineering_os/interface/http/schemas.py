@@ -67,6 +67,18 @@ class ExportJobOut(BaseModel):
     created_at: datetime
 
 
+class ExplanationOut(BaseModel):
+    entity_id: str
+    type: str
+    label: str
+    summary: str
+    evidence: list[str]
+    sources: list[str]
+    appears_in: list[str]
+    related_decisions: list[str]
+    confidence: float
+
+
 class BuildPlanItemOut(BaseModel):
     renderer: str
     build: bool
