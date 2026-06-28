@@ -1,12 +1,30 @@
-# Local infrastructure for development. App services are added during implementation.
+# Full local stack: Postgres + Redis + the API (production profile). `docker compose up --build`.
+# The API runs migrations on start, then serves; it waits for Postgres to be healthy first.
 services:
   postgres:
     image: postgres:16
-    environment: { POSTGRES_PASSWORD: dev, POSTGRES_DB: engineering_os }
+    environment: { POSTGRES_USER: eos, POSTGRES_PASSWORD: dev, POSTGRES_DB: engineering_os }
     ports: ["5432:5432"]
     volumes: ["pgdata:/var/lib/postgresql/data"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U eos -d engineering_os"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
   redis:
     image: redis:7
     ports: ["6379:6379"]
+  api:
+    build: ./apps/api
+    environment:
+      APP_ENV: production
+      DATABASE_URL: postgresql+psycopg://eos:dev@postgres:5432/engineering_os
+      # Demo key so the stack boots unattended — override in any real deployment.
+      TOKEN_ENCRYPTION_KEY: ${TOKEN_ENCRYPTION_KEY:-compose-demo-key-do-not-use-in-prod}
+      CORS_ORIGINS: http://localhost:3000
+      AI_PROVIDER: fake
+    ports: ["8000:8000"]
+    depends_on:
+      postgres: { condition: service_healthy }
 volumes:
   pgdata:

@@ -19,6 +19,21 @@
 > This README is the entry point. A new visitor should be able to navigate the entire project
 > from here.
 
+## Run it
+
+```bash
+# Full stack (Postgres + Redis + API) in containers — migrations run automatically:
+docker compose up --build          # API on http://localhost:8000  ·  /health/ready when up
+
+# Or the API alone, from a clean checkout (needs Python 3.12):
+make dev                           # creates the venv, installs, serves with reload
+make test                          # lint + the test suite
+```
+
+Health: `/health/live` (liveness) · `/health/ready` (readiness — 503 until the DB answers). The
+production profile (`APP_ENV=production`) fails fast on insecure config and enforces secure cookies,
+token encryption, and rate limiting. See the [beta-readiness register](docs/08-decisions/beta-readiness-register.md).
+
 ## Why Engineering OS?
 
 Strong engineers ship work that under-sells them. The hard part of a great repository isn't the
