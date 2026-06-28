@@ -54,6 +54,21 @@ Pre-commit with **gitleaks + detect-private-key + ruff/ruff-format**; Dependabot
 structured AI observability; 95 backend tests including property-based hardening; the full
 specification/invariants/history; and a compiler boundary that keeps secrets out of the core.
 
+## Sprint 2 — Deployability
+
+> **Mission:** any engineer can deploy Engineering OS into a production-like environment from a clean
+> checkout using documented steps, with no manual intervention.
+>
+> **Success criteria:** ☐ image builds · ☐ containers start · ☐ migrations run automatically ·
+> ☑ readiness/liveness report correctly · ☑ secure production profile enforced · ☐ API responds after
+> cold start. *(Checked items are verified here; unchecked require a Docker host — see metrics.)*
+>
+> **Exit criteria:** `docker compose up` (or `make up`) brings the stack up; `make dev` takes a fresh
+> machine from zero to a running API; BR-03…BR-07 resolved.
+>
+> **Phases:** 1 Dockerfile → 2 Compose → 3 Alembic → 4 Health → 5 Production config → 6 Rate limiting
+> *(deploy first, harden the deployed service last)*.
+
 ## Sprints (hardening, not features)
 
 1. **Trust (Critical):** BR-01, BR-02 → ✅ **shipped in `alpha-0.3.1`.**

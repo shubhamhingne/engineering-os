@@ -16,6 +16,7 @@ from ...modules.knowledge.service import KnowledgeExtractor
 from ...modules.readme.service import ReadmeService
 from ...ports.ai_provider import AIProvider
 from .deps import get_db, get_owned_project, get_provider
+from .ratelimit import generation_rate_limit
 from .schemas import ArtifactSave, ArtifactVersionOut, ReadmeQualityOut, VersionSummaryOut
 
 router = APIRouter(prefix="/api/v1")
@@ -55,6 +56,7 @@ def generate_artifact(
     project: Project = Depends(get_owned_project),
     db: Session = Depends(get_db),
     provider: AIProvider = Depends(get_provider),
+    _rl: None = Depends(generation_rate_limit),
 ) -> ArtifactVersionOut:
     _require_type(artifact_type)
     project_id = project.id
@@ -111,6 +113,7 @@ def stream_artifact(
     project: Project = Depends(get_owned_project),
     db: Session = Depends(get_db),
     provider: AIProvider = Depends(get_provider),
+    _rl: None = Depends(generation_rate_limit),
 ) -> StreamingResponse:
     _require_type(artifact_type)
     if artifact_type not in STREAMABLE_TYPES:

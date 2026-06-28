@@ -13,6 +13,7 @@ from ...config import settings
 from ...modules.identity.service import IdentityService
 from ...ports.oauth import OAuthProvider
 from .deps import get_current_user, get_db, get_oauth_provider
+from .ratelimit import auth_rate_limit
 from .schemas import UserOut
 
 router = APIRouter(prefix="/api/v1/auth")
@@ -48,6 +49,7 @@ def github_callback(
     state: str,
     db: Session = Depends(get_db),
     oauth: OAuthProvider = Depends(get_oauth_provider),
+    _rl: None = Depends(auth_rate_limit),
 ) -> RedirectResponse:
     """Complete OAuth: verify state, exchange the code, resolve the identity, mint a session."""
     expected = request.cookies.get(_STATE_COOKIE, "")

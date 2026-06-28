@@ -1,10 +1,12 @@
 """Environment-driven settings (12-factor)."""
+from pydantic import model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
+    app_env: str = "development"           # "development" | "production"
     database_url: str = "sqlite:///./engineering_os.db"
     cors_origins: str = "http://localhost:3000"
 
@@ -30,6 +32,30 @@ class Settings(BaseSettings):
     # secret. When unset, a deterministic insecure dev key is used and a warning is logged — tokens
     # are still never stored as plaintext.
     token_encryption_key: str = ""
+
+    # Abuse protection (BR-05). Off in dev/tests; the production profile turns it on.
+    rate_limit_enabled: bool = False
+    rate_limit_per_minute: int = 30        # per client, per limited route group
+
+    @property
+    def is_production(self) -> bool:
+        return self.app_env.lower() == "production"
+
+    @model_validator(mode="after")
+    def _enforce_production_profile(self) -> "Settings":
+        """In production, fail fast on insecure defaults (BR-07) rather than starting unsafely."""
+        if self.is_production:
+            problems = []
+            if not self.token_encryption_key:
+                problems.append("TOKEN_ENCRYPTION_KEY must be set")
+            if self.database_url.startswith("sqlite"):
+                problems.append("DATABASE_URL must not be SQLite")
+            if problems:
+                raise ValueError("insecure production config: " + "; ".join(problems))
+            # Secure-by-default in production.
+            self.cookie_secure = True
+            self.rate_limit_enabled = True
+        return self
 
 
 settings = Settings()
