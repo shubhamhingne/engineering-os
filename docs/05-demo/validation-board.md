@@ -54,6 +54,24 @@ while still responding fast to genuine patterns.
 
 Did they finish? · Where did they stop? · How long did it take? · What errored? · Did they return?
 
+## Evidence scoreboard
+
+The only dashboard for this phase — adoption, not engineering. No lines of code, test count, or
+coverage; those served their purpose and are no longer the bottleneck.
+
+| Metric | Target | Current |
+|---|---|---|
+| Live production URL | ✅ | ⏳ |
+| Demo video | ✅ | ⏳ |
+| Lighthouse performance | ≥ 90 | ⏳ |
+| Accessibility (WCAG AA) | Pass | ⏳ |
+| First external user | 1 | ⏳ |
+| Users completing the workflow | 5 | ⏳ |
+| Independent issues filed | 10 | ⏳ |
+| Returning users | 3 | ⏳ |
+| GitHub stars from strangers | 10 | ⏳ |
+| Public article published | 1 | ⏳ |
+
 ## Board
 
 | ID | Observation | Evidence | Decision |
