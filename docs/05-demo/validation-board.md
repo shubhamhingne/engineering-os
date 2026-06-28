@@ -6,6 +6,16 @@ evidence, and the decision it justifies. This is what turns observation into eng
 > **The one success metric:** *Can someone who has never met me successfully use Engineering OS to
 > create a project?* Everything else is secondary.
 
+## Metrics, in priority order
+
+1. Can a stranger complete the workflow unassisted?
+2. Time to the first "aha" moment.
+3. % who return for a second session.
+4. The step with the highest abandonment.
+5. The request that appears repeatedly across users.
+
+These say more about the product than another hundred backend tests.
+
 ## The No-Build rule
 
 No feature is built unless it is supported by at least one of:
@@ -17,6 +27,19 @@ No feature is built unless it is supported by at least one of:
 
 When work resumes, every proposed build cites the board row (or rule #4) that justifies it. No row,
 no build.
+
+## Evidence thresholds — how much evidence reopens engineering
+
+The gate says *evidence required*; this says *how much*. It prevents overreacting to one loud voice
+while still responding fast to genuine patterns.
+
+| Trigger | Engineering response |
+|---|---|
+| 1 user reports an issue | Investigate, don't build |
+| 3+ independent users report the same issue | Prioritize |
+| >30% drop-off at one workflow step | Highest-priority UX fix |
+| Repeated request from multiple target users | Consider feature |
+| Security / reliability regression | Immediate fix, regardless of demand |
 
 ## Waves
 
@@ -40,6 +63,17 @@ Did they finish? · Where did they stop? · How long did it take? · What errore
 | | | | |
 
 *Rows above in italics are format examples — replace with real observations. Each justified build links back here.*
+
+## When engineering resumes — the four questions
+
+Every request is run through these before any code is written:
+
+1. **Which board item or evidence justifies this?** (no row, no build)
+2. **Specification change, or only implementation?** (the core is frozen — a spec change needs an ADR)
+3. **Is there a smaller solution that addresses the observed problem?**
+4. **How will we know the change worked?** (the behaviour we expect to move)
+
+If those can't be answered, the recommendation is *don't build*.
 
 ## What to bring back (for the next engineering session)
 
