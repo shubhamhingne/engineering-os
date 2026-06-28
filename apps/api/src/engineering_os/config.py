@@ -37,6 +37,9 @@ class Settings(BaseSettings):
     rate_limit_enabled: bool = False
     rate_limit_per_minute: int = 30        # per client, per limited route group
 
+    # Resilience: retry attempts for transient external-call failures (AI providers, GitHub).
+    external_retry_attempts: int = 3
+
     @property
     def is_production(self) -> bool:
         return self.app_env.lower() == "production"

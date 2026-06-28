@@ -99,6 +99,13 @@ specification/invariants/history; and a compiler boundary that keeps secrets out
 6. **Operability polish:** BR-15 (SLOs/error budgets), BR-16 (runbooks), BR-17 (saturation) — from the
    Sprint 3 review; a pre-public-beta pass.
 7. **Public beta:** first external users, real-world issues, community feedback.
+
+### Backend hardening (`alpha-0.3.6`)
+
+Quality work, no new features: **retry + exponential backoff** for transient external calls (AI
+providers, GitHub) via a unit-tested `call_with_retry`; **performance budgets** (compile-time
+regression guards); and **API contract tests** pinning the OpenAPI paths and core response shapes so
+a breaking change fails CI, not a client. 110 → 121 tests.
 5. **Launch readiness:** BR-09 (a11y), BR-13, screenshots/demo, OpenAPI snapshot.
 
 ## Decision: web-ci stays non-gating until the frontend is real

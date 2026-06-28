@@ -5,9 +5,12 @@ the suite, not estimated.
 
 | Signal | Status | Detail |
 |---|---|---|
-| Release | `alpha-0.3.5` | beta hardening, Sprint 5 (launch readiness) |
-| Tests | ✅ 110 passing | backend; incl. property-based |
-| Coverage | ✅ 93% | `pytest --cov` |
+| Release | `alpha-0.3.6` | beta hardening, Sprint 6 (backend resilience) |
+| Tests | ✅ 121 passing | backend; incl. property-based |
+| Coverage | ✅ 92% | `pytest --cov` (defensive retry paths are network-only) |
+| Resilience | ✅ Retry + backoff | external calls (AI providers, GitHub) |
+| Performance | ✅ Budget guarded | compile-time regression test |
+| Contract | ✅ API surface pinned | OpenAPI path + schema tests |
 | CI (api) | ✅ Gating | lint + tests, no `\|\| true` |
 | Lint | ✅ Passing | `ruff check` |
 | Secret scanning | ✅ Passing | pre-commit `gitleaks` + `detect-private-key` |

@@ -11,8 +11,8 @@
   </p>
   <p>
     <a href="https://github.com/shubhamhingne/engineering-os/actions/workflows/api-ci.yml"><img alt="API CI" src="https://github.com/shubhamhingne/engineering-os/actions/workflows/api-ci.yml/badge.svg"></a>
-    <img alt="tests" src="https://img.shields.io/badge/tests-110%20passing-brightgreen">
-    <img alt="coverage" src="https://img.shields.io/badge/coverage-93%25-brightgreen">
+    <img alt="tests" src="https://img.shields.io/badge/tests-121%20passing-brightgreen">
+    <img alt="coverage" src="https://img.shields.io/badge/coverage-92%25-brightgreen">
     <img alt="python" src="https://img.shields.io/badge/python-3.12-blue">
     <a href="https://github.com/shubhamhingne/engineering-os/releases"><img alt="release" src="https://img.shields.io/github/v/tag/shubhamhingne/engineering-os?label=release&sort=semver"></a>
     <img alt="license" src="https://img.shields.io/github/license/shubhamhingne/engineering-os">

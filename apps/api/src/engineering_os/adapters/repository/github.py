@@ -3,7 +3,9 @@ every other port. The reader only *reads*; it never writes (ADR-0015)."""
 import hashlib
 from typing import Optional
 
+from ...config import settings
 from ...ports.repository import RemoteSnapshot
+from ...resilience import call_with_retry
 
 _API = "https://api.github.com"
 
@@ -27,26 +29,32 @@ class GitHubRepositoryReader:
     def read_state(self, repository: str) -> Optional[RemoteSnapshot]:
         import httpx
 
+        attempts = settings.external_retry_attempts
+        transient = (httpx.TransportError,)  # connection/timeout blips — retry; 4xx/5xx surface
+
+        def _get(client, url, **kw):
+            return call_with_retry(lambda: client.get(url, **kw), attempts=attempts, retry_on=transient)
+
         with httpx.Client(headers=self._headers(), timeout=10.0) as client:
-            repo = client.get(f"{_API}/repos/{repository}")
+            repo = _get(client, f"{_API}/repos/{repository}")
             if repo.status_code == 404:
                 return None
             repo.raise_for_status()
             default_branch = repo.json().get("default_branch", "main")
 
-            head = client.get(f"{_API}/repos/{repository}/commits/{default_branch}")
+            head = _get(client, f"{_API}/repos/{repository}/commits/{default_branch}")
             head.raise_for_status()
             head_sha = head.json()["sha"]
 
-            tree = client.get(
-                f"{_API}/repos/{repository}/git/trees/{head_sha}", params={"recursive": "1"}
+            tree = _get(
+                client, f"{_API}/repos/{repository}/git/trees/{head_sha}", params={"recursive": "1"}
             )
             tree.raise_for_status()
             hashes: dict = {}
             for entry in tree.json().get("tree", []):
                 if entry.get("type") != "blob":
                     continue
-                blob = client.get(f"{_API}/repos/{repository}/git/blobs/{entry['sha']}")
+                blob = _get(client, f"{_API}/repos/{repository}/git/blobs/{entry['sha']}")
                 blob.raise_for_status()
                 import base64
 

@@ -2,7 +2,16 @@
 the app (and tests with the fake) never require it."""
 from collections.abc import Iterator
 
+from ...config import settings
 from ...ports.ai_provider import GenerationResult, Prompt
+from ...resilience import call_with_retry
+
+
+def _transient_errors() -> tuple:
+    """Anthropic's retryable failures (connection blips, rate limits, 5xx)."""
+    import anthropic
+
+    return (anthropic.APIConnectionError, anthropic.RateLimitError, anthropic.InternalServerError)
 
 
 class AnthropicProvider:
@@ -18,11 +27,15 @@ class AnthropicProvider:
         return anthropic.Anthropic(api_key=self._api_key)
 
     def generate(self, prompt: Prompt) -> GenerationResult:
-        message = self._client().messages.create(
-            model=self.model,
-            max_tokens=1500,
-            system=prompt.system,
-            messages=[{"role": "user", "content": prompt.user}],
+        message = call_with_retry(
+            lambda: self._client().messages.create(
+                model=self.model,
+                max_tokens=1500,
+                system=prompt.system,
+                messages=[{"role": "user", "content": prompt.user}],
+            ),
+            attempts=settings.external_retry_attempts,
+            retry_on=_transient_errors(),
         )
         text = "".join(b.text for b in message.content if getattr(b, "type", "") == "text")
         return GenerationResult(
