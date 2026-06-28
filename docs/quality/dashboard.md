@@ -5,7 +5,7 @@ the suite, not estimated.
 
 | Signal | Status | Detail |
 |---|---|---|
-| Release | `alpha-0.3.3` | beta hardening, Sprint 3 |
+| Release | `alpha-0.3.4` | beta hardening, Sprint 4 |
 | Tests | ✅ 110 passing | backend; incl. property-based |
 | Coverage | ✅ 93% | `pytest --cov` |
 | CI (api) | ✅ Gating | lint + tests, no `\|\| true` |
@@ -17,6 +17,7 @@ the suite, not estimated.
 | Docker image | 🟡 Pending verification | authored; needs a Docker host to build |
 | Accessibility | ⏳ Pending | Sprint 5 (needs Node) |
 | Performance | ⏳ Pending | Sprint 5 (load test) |
-| Technical debt | 7 closed · 1 authored · 6 open | see [register](../08-decisions/beta-readiness-register.md) |
+| Developer experience | ✅ `make setup`→`make test` (2 cmds, 0 edits) | [DX KPIs](dx-kpis.md) · runnable `make example` |
+| Technical debt | 8 closed · 4 partial · 5 open | see [register](../08-decisions/beta-readiness-register.md) |
 
 Legend: ✅ verified · 🟡 done but unverified here · ⏳ scheduled.

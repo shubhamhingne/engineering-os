@@ -21,12 +21,15 @@ around them is the remaining work.
 | BR-06 | Static `/health`; no readiness vs liveness | Reliability | Medium | High | High | ✅ Resolved | Beta-0.2 | `cd22797` · alpha-0.3.2 · 2026-06-28 |
 | BR-07 | Cookie/CORS prod hardening (`cookie_secure=False`) | Security | Medium | Medium | High | ✅ Resolved | Beta-0.2 | `cd22797` · alpha-0.3.2 · 2026-06-28 |
 | BR-08 | Observability is AI-action-only (no req-IDs/metrics/traces) | Observability | Medium | High | Medium | ✅ Resolved | Beta-0.3 | `4732df9` · alpha-0.3.3 · 2026-06-28 |
-| BR-09 | No frontend tests; accessibility unverified | UX | Medium | High | Medium | Open | Beta-0.4 | — |
-| BR-10 | No lockfile (version ranges only) | DX | Medium | Medium | Medium | Open | Beta-0.3 | — |
-| BR-11 | `examples/` is a stub; no one-command bootstrap | DX | Low | High | Medium | Open | Beta-0.3 | — |
-| BR-12 | Real GitHub reader does O(files) blob fetches | Performance | Medium | Low | Medium | Open | Beta-0.3 | — |
-| BR-13 | OSS completeness: no `CODE_OF_CONDUCT`, no OpenAPI snapshot in CI | OSS | Low | Medium | Nice-to-have | Open | Beta-0.4 | — |
-| BR-14 | Local toolchain is Python 3.9; project requires 3.12 (CI uses 3.12) | DX | Medium | Medium | Medium | Open | Beta-0.3 | — |
+| BR-09 | No frontend tests; accessibility unverified | UX | Medium | High | Medium | Open | Beta-0.5 | — (needs Node) |
+| BR-10 | No lockfile (version ranges only) | DX | Medium | Medium | Medium | 🟡 Tooling | Beta-0.4 | `make lock` + workflow; lock generated on 3.12 in CI |
+| BR-11 | `examples/` is a stub; no one-command bootstrap | DX | Low | High | Medium | ✅ Resolved | Beta-0.4 | `alpha-0.3.4` · runnable `examples/seed.py` + `make setup/example` |
+| BR-12 | Real GitHub reader does O(files) blob fetches | Performance | Medium | Low | Medium | Open | Beta-0.5 | — |
+| BR-13 | OSS completeness: `CODE_OF_CONDUCT`, OpenAPI snapshot in CI | OSS | Low | Medium | Nice-to-have | 🟡 Partial | Beta-0.4 | `alpha-0.3.4` · CoC added; OpenAPI snapshot still open |
+| BR-14 | Local toolchain is Python 3.9; project requires 3.12 (CI uses 3.12) | DX | Medium | Medium | Medium | 🟡 Pinned | Beta-0.4 | `.python-version` 3.12 + docs; a 3.12 run unverified here |
+| BR-15 | No SLOs / error budgets | Operability | Medium | Medium | Medium | Open | Beta-0.5 | — (from Sprint 3 review) |
+| BR-16 | No incident runbooks | Operability | Medium | Medium | Medium | Open | Beta-0.5 | — (from Sprint 3 review) |
+| BR-17 | Golden signals miss *saturation* (in-flight, SSE, pool) | Observability | Low | Medium | Medium | Open | Beta-0.5 | — (from Sprint 3 review) |
 
 *Impact/Likelihood are pre-mitigation. On resolution, an item records its commit SHA, release, and date.*
 
@@ -72,13 +75,13 @@ specification/invariants/history; and a compiler boundary that keeps secrets out
 
 ## Sprint metrics
 
-| Metric | Sprint 1 → after | Sprint 2 → after | Sprint 3 → after |
-|---|---|---|---|
-| Tests | 95 → 97 | 97 → 105 | 105 → 110 |
-| Coverage | — → 92% | 92% → 93% | 93% → 93% |
-| Critical findings open | 2 → 0 | 0 → 0 | 0 → 0 |
-| High findings open | 5 → 5 | 5 → 0 | 0 → 0 |
-| Diagnosability | — | — | request/trace IDs · `/metrics` · structured logs |
+| Metric | Sprint 1 | Sprint 2 | Sprint 3 | Sprint 4 |
+|---|---|---|---|---|
+| Tests | 95 → 97 | 97 → 105 | 105 → 110 | 110 → 110 |
+| Coverage | — → 92% | 92% → 93% | 93% → 93% | 93% → 93% |
+| Critical / High open | 2→0 / 5→5 | 0 / 5→0 | 0 / 0 | 0 / 0 |
+| Setup commands to first green test | — | — | — | **2** (`make setup` → `make test`) |
+| Manual edits to run | — | — | — | **0** |
 
 ## Sprints (hardening, not features)
 
@@ -86,7 +89,11 @@ specification/invariants/history; and a compiler boundary that keeps secrets out
 2. **Deployability:** BR-04, BR-05, BR-06, BR-07 ✅ + BR-03 🟡 (authored; build pending a Docker host)
    → **shipped in `alpha-0.3.2`.**
 3. **Production Diagnostics:** BR-08 ✅ → **shipped in `alpha-0.3.3`** ([evidence](../05-demo/evidence/sprint-3.md)).
-4. **Developer experience:** BR-10, BR-14, BR-11, frontend smoke (BR-09).
+4. **Developer experience:** BR-11 ✅, BR-13 🟡, BR-14 🟡, BR-10 🟡 → **shipped in `alpha-0.3.4`**
+   ([DX KPIs](../quality/dx-kpis.md)).
+5. **Operability polish:** BR-15 (SLOs/error budgets), BR-16 (runbooks), BR-17 (saturation) — raised
+   in the Sprint 3 review.
+6. **Launch readiness:** BR-09 (a11y/frontend), BR-12, Docker build verification, performance budget.
 5. **Launch readiness:** BR-09 (a11y), BR-13, screenshots/demo, OpenAPI snapshot.
 
 ## Decision: web-ci stays non-gating until the frontend is real
