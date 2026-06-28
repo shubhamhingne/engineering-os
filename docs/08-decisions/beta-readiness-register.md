@@ -15,11 +15,11 @@ around them is the remaining work.
 |---|---|---|---|---|---|---|---|---|
 | BR-01 | CI runs `ruff`/`pytest` with `\|\| true` — never gates | Reliability | High | High | **Critical** | ✅ Resolved | Beta-0.1 | `4b79eb4` · alpha-0.3.1 · 2026-06-27 |
 | BR-02 | GitHub OAuth tokens stored plaintext at rest | Security | High | High | **Critical** | ✅ Resolved | Beta-0.1 | `8c3e986` · alpha-0.3.1 · 2026-06-27 |
-| BR-03 | No application Dockerfile / reproducible deploy path | Reliability | High | High | High | Open | Beta-0.2 | — |
-| BR-04 | No DB migrations (`create_all`, no Alembic) | Reliability | High | Medium | High | Open | Beta-0.2 | — |
-| BR-05 | No rate limiting on AI / OAuth endpoints | Security | High | Medium | High | Open | Beta-0.2 | — |
-| BR-06 | Static `/health`; no readiness vs liveness | Reliability | Medium | High | High | Open | Beta-0.2 | — |
-| BR-07 | Cookie/CORS prod hardening (`cookie_secure=False`) | Security | Medium | Medium | High | Open | Beta-0.2 | — |
+| BR-03 | No application Dockerfile / reproducible deploy path | Reliability | High | High | High | 🟡 Authored | Beta-0.2 | `1259459` · alpha-0.3.2 · build unverified (no Docker host) |
+| BR-04 | No DB migrations (`create_all`, no Alembic) | Reliability | High | Medium | High | ✅ Resolved | Beta-0.2 | `cd22797` · alpha-0.3.2 · 2026-06-28 |
+| BR-05 | No rate limiting on AI / OAuth endpoints | Security | High | Medium | High | ✅ Resolved | Beta-0.2 | `cd22797` · alpha-0.3.2 · 2026-06-28 |
+| BR-06 | Static `/health`; no readiness vs liveness | Reliability | Medium | High | High | ✅ Resolved | Beta-0.2 | `cd22797` · alpha-0.3.2 · 2026-06-28 |
+| BR-07 | Cookie/CORS prod hardening (`cookie_secure=False`) | Security | Medium | Medium | High | ✅ Resolved | Beta-0.2 | `cd22797` · alpha-0.3.2 · 2026-06-28 |
 | BR-08 | Observability is AI-action-only (no req-IDs/metrics/traces) | Observability | Medium | High | Medium | Open | Beta-0.3 | — |
 | BR-09 | No frontend tests; accessibility unverified | UX | Medium | High | Medium | Open | Beta-0.4 | — |
 | BR-10 | No lockfile (version ranges only) | DX | Medium | Medium | Medium | Open | Beta-0.3 | — |
@@ -59,9 +59,10 @@ specification/invariants/history; and a compiler boundary that keeps secrets out
 > **Mission:** any engineer can deploy Engineering OS into a production-like environment from a clean
 > checkout using documented steps, with no manual intervention.
 >
-> **Success criteria:** ☐ image builds · ☐ containers start · ☐ migrations run automatically ·
-> ☑ readiness/liveness report correctly · ☑ secure production profile enforced · ☐ API responds after
-> cold start. *(Checked items are verified here; unchecked require a Docker host — see metrics.)*
+> **Success criteria:** ☐ image builds · ☐ containers start · ☑ migrations run automatically
+> (`alembic upgrade head` verified on SQLite; wired into the container entrypoint) · ☑ readiness/
+> liveness report correctly · ☑ secure production profile enforced · ☐ API responds after cold start.
+> *(Checked items are verified here; the three unchecked require a Docker host — see metrics.)*
 >
 > **Exit criteria:** `docker compose up` (or `make up`) brings the stack up; `make dev` takes a fresh
 > machine from zero to a running API; BR-03…BR-07 resolved.
@@ -69,10 +70,21 @@ specification/invariants/history; and a compiler boundary that keeps secrets out
 > **Phases:** 1 Dockerfile → 2 Compose → 3 Alembic → 4 Health → 5 Production config → 6 Rate limiting
 > *(deploy first, harden the deployed service last)*.
 
+## Sprint metrics
+
+| Metric | Sprint 1 → after | Sprint 2 → after |
+|---|---|---|
+| Tests | 95 → 97 | 97 → 105 |
+| Coverage | — → 92% | 92% → 93% |
+| Critical findings open | 2 → 0 | 0 → 0 |
+| High findings open | 5 → 5 | 5 → 0 |
+| Deployment time | N/A | **not measured** (no Docker host in this environment) |
+
 ## Sprints (hardening, not features)
 
 1. **Trust (Critical):** BR-01, BR-02 → ✅ **shipped in `alpha-0.3.1`.**
-2. **Deployability:** BR-03, BR-04, BR-05, BR-06, BR-07.
+2. **Deployability:** BR-04, BR-05, BR-06, BR-07 ✅ + BR-03 🟡 (authored; build pending a Docker host)
+   → **shipped in `alpha-0.3.2`.**
 3. **Operability:** BR-08, BR-10, BR-12, BR-14.
 4. **Developer experience:** BR-11, frontend smoke (BR-09).
 5. **Launch readiness:** BR-09 (a11y), BR-13, screenshots/demo, OpenAPI snapshot.
