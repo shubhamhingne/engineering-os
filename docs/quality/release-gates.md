@@ -17,6 +17,17 @@ regression and the unmet gates are scheduled.
 | Performance | ⏳ NOT VERIFIED | scheduled Sprint 5 (load test) |
 | Accessibility | ⏳ NOT VERIFIED | scheduled Sprint 5 (needs Node) |
 
+## `alpha-0.3.5` — Launch readiness (GitHub-facing)
+
+| Gate | Result | Evidence |
+|---|---|---|
+| Discoverability | ✅ PASS | badges, executive [status](../05-demo/status.md), architecture [diagrams](../02-architecture/22-architecture-diagrams.md), GitHub Releases |
+| Documentation | ✅ PASS | 0 broken links; spec, register, evidence, status current |
+| Docker build | ⏳ NOT VERIFIED | authored; needs a Docker host (owner-run) |
+| Performance | ⏳ NOT VERIFIED | Lighthouse / load test (owner-run) |
+| Accessibility | ⏳ NOT VERIFIED | audit needs a browser (owner-run) |
+| Demo assets | ⏳ NOT VERIFIED | video + screenshots need a browser/recorder (owner-run) |
+
 ## History
 
 | Release | Theme | Gates met |
@@ -24,3 +35,5 @@ regression and the unmet gates are scheduled.
 | `alpha-0.3.1` | Trust | Security, Tests, CI |
 | `alpha-0.3.2` | Deployability | Deployment*, Tests, Docs |
 | `alpha-0.3.3` | Production Diagnostics | Observability, Tests, Docs |
+| `alpha-0.3.4` | Developer Experience | DX, Tests, Docs |
+| `alpha-0.3.5` | Launch readiness | Discoverability, Docs |

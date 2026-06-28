@@ -5,7 +5,7 @@ the suite, not estimated.
 
 | Signal | Status | Detail |
 |---|---|---|
-| Release | `alpha-0.3.4` | beta hardening, Sprint 4 |
+| Release | `alpha-0.3.5` | beta hardening, Sprint 5 (launch readiness) |
 | Tests | ✅ 110 passing | backend; incl. property-based |
 | Coverage | ✅ 93% | `pytest --cov` |
 | CI (api) | ✅ Gating | lint + tests, no `\|\| true` |

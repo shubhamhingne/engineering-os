@@ -30,6 +30,8 @@ around them is the remaining work.
 | BR-15 | No SLOs / error budgets | Operability | Medium | Medium | Medium | Open | Beta-0.5 | — (from Sprint 3 review) |
 | BR-16 | No incident runbooks | Operability | Medium | Medium | Medium | Open | Beta-0.5 | — (from Sprint 3 review) |
 | BR-17 | Golden signals miss *saturation* (in-flight, SSE, pool) | Observability | Low | Medium | Medium | Open | Beta-0.5 | — (from Sprint 3 review) |
+| BR-18 | No demo video / UI screenshots (launch assets) | Portfolio | Medium | High | Medium | Open | Beta-0.5 | — (needs a browser + screen recorder) |
+| BR-19 | No performance budget / Lighthouse run | Performance | Medium | Medium | Medium | Open | Beta-0.5 | — (needs Node/browser) |
 
 *Impact/Likelihood are pre-mitigation. On resolution, an item records its commit SHA, release, and date.*
 
@@ -91,9 +93,12 @@ specification/invariants/history; and a compiler boundary that keeps secrets out
 3. **Production Diagnostics:** BR-08 ✅ → **shipped in `alpha-0.3.3`** ([evidence](../05-demo/evidence/sprint-3.md)).
 4. **Developer experience:** BR-11 ✅, BR-13 🟡, BR-14 🟡, BR-10 🟡 → **shipped in `alpha-0.3.4`**
    ([DX KPIs](../quality/dx-kpis.md)).
-5. **Operability polish:** BR-15 (SLOs/error budgets), BR-16 (runbooks), BR-17 (saturation) — raised
-   in the Sprint 3 review.
-6. **Launch readiness:** BR-09 (a11y/frontend), BR-12, Docker build verification, performance budget.
+5. **Launch readiness (in progress):** badges, executive [status](../05-demo/status.md), architecture
+   [diagrams](../02-architecture/22-architecture-diagrams.md), GitHub Releases → **`alpha-0.3.5`**.
+   Owner-run on real infra: Docker build verify (BR-03), a11y (BR-09), performance (BR-19), demo (BR-18).
+6. **Operability polish:** BR-15 (SLOs/error budgets), BR-16 (runbooks), BR-17 (saturation) — from the
+   Sprint 3 review; a pre-public-beta pass.
+7. **Public beta:** first external users, real-world issues, community feedback.
 5. **Launch readiness:** BR-09 (a11y), BR-13, screenshots/demo, OpenAPI snapshot.
 
 ## Decision: web-ci stays non-gating until the frontend is real
