@@ -19,8 +19,8 @@ row, follow the link.
 | **Performance** | ⏳ Pending — load test / Lighthouse |
 | **Security** | ✅ Tokens encrypted at rest · prod config guard · secret scanning |
 | **Open findings** | 5 open · 4 partial · 8 closed — [register](../08-decisions/beta-readiness-register.md) |
-| **Current milestone** | **Evidence** (owner-run): Docker build · live deploy · demo · Lighthouse · a11y · first external testers |
-| **Then** | `v0.4 — Provider Ecosystem`, then Repository Intelligence |
+| **Current milestone** | **`v0.4 — Validation`** (founder-led, not engineering): real users · live deploy · demo · Lighthouse · a11y · feedback. Evidence is the output; validation is the goal. |
+| **Then** | `v0.5 — Provider Ecosystem` (built around what users actually ask for), then Repository Intelligence |
 
 Legend: ✅ verified · 🟡 done but unverified in this environment · ⏳ scheduled · 🔒 frozen.
 
