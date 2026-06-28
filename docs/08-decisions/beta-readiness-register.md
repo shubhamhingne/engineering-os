@@ -20,7 +20,7 @@ around them is the remaining work.
 | BR-05 | No rate limiting on AI / OAuth endpoints | Security | High | Medium | High | ✅ Resolved | Beta-0.2 | `cd22797` · alpha-0.3.2 · 2026-06-28 |
 | BR-06 | Static `/health`; no readiness vs liveness | Reliability | Medium | High | High | ✅ Resolved | Beta-0.2 | `cd22797` · alpha-0.3.2 · 2026-06-28 |
 | BR-07 | Cookie/CORS prod hardening (`cookie_secure=False`) | Security | Medium | Medium | High | ✅ Resolved | Beta-0.2 | `cd22797` · alpha-0.3.2 · 2026-06-28 |
-| BR-08 | Observability is AI-action-only (no req-IDs/metrics/traces) | Observability | Medium | High | Medium | Open | Beta-0.3 | — |
+| BR-08 | Observability is AI-action-only (no req-IDs/metrics/traces) | Observability | Medium | High | Medium | ✅ Resolved | Beta-0.3 | `4732df9` · alpha-0.3.3 · 2026-06-28 |
 | BR-09 | No frontend tests; accessibility unverified | UX | Medium | High | Medium | Open | Beta-0.4 | — |
 | BR-10 | No lockfile (version ranges only) | DX | Medium | Medium | Medium | Open | Beta-0.3 | — |
 | BR-11 | `examples/` is a stub; no one-command bootstrap | DX | Low | High | Medium | Open | Beta-0.3 | — |
@@ -72,21 +72,21 @@ specification/invariants/history; and a compiler boundary that keeps secrets out
 
 ## Sprint metrics
 
-| Metric | Sprint 1 → after | Sprint 2 → after |
-|---|---|---|
-| Tests | 95 → 97 | 97 → 105 |
-| Coverage | — → 92% | 92% → 93% |
-| Critical findings open | 2 → 0 | 0 → 0 |
-| High findings open | 5 → 5 | 5 → 0 |
-| Deployment time | N/A | **not measured** (no Docker host in this environment) |
+| Metric | Sprint 1 → after | Sprint 2 → after | Sprint 3 → after |
+|---|---|---|---|
+| Tests | 95 → 97 | 97 → 105 | 105 → 110 |
+| Coverage | — → 92% | 92% → 93% | 93% → 93% |
+| Critical findings open | 2 → 0 | 0 → 0 | 0 → 0 |
+| High findings open | 5 → 5 | 5 → 0 | 0 → 0 |
+| Diagnosability | — | — | request/trace IDs · `/metrics` · structured logs |
 
 ## Sprints (hardening, not features)
 
 1. **Trust (Critical):** BR-01, BR-02 → ✅ **shipped in `alpha-0.3.1`.**
 2. **Deployability:** BR-04, BR-05, BR-06, BR-07 ✅ + BR-03 🟡 (authored; build pending a Docker host)
    → **shipped in `alpha-0.3.2`.**
-3. **Operability:** BR-08, BR-10, BR-12, BR-14.
-4. **Developer experience:** BR-11, frontend smoke (BR-09).
+3. **Production Diagnostics:** BR-08 ✅ → **shipped in `alpha-0.3.3`** ([evidence](../05-demo/evidence/sprint-3.md)).
+4. **Developer experience:** BR-10, BR-14, BR-11, frontend smoke (BR-09).
 5. **Launch readiness:** BR-09 (a11y), BR-13, screenshots/demo, OpenAPI snapshot.
 
 ## Decision: web-ci stays non-gating until the frontend is real
