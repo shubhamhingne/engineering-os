@@ -17,6 +17,7 @@ dependencies = [
   "cryptography>=42",
   "alembic>=1.13",
   "psycopg[binary]>=3.1",   # PostgreSQL driver for the production database
+  "prometheus-client>=0.20",
 ]
 
 [project.optional-dependencies]

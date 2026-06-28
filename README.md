@@ -30,9 +30,11 @@ make dev                           # creates the venv, installs, serves with rel
 make test                          # lint + the test suite
 ```
 
-Health: `/health/live` (liveness) · `/health/ready` (readiness — 503 until the DB answers). The
-production profile (`APP_ENV=production`) fails fast on insecure config and enforces secure cookies,
-token encryption, and rate limiting. See the [beta-readiness register](docs/08-decisions/beta-readiness-register.md).
+Health: `/health/live` (liveness) · `/health/ready` (readiness — 503 until the DB answers) · `/metrics`
+(Prometheus). The production profile (`APP_ENV=production`) fails fast on insecure config and enforces
+secure cookies, token encryption, and rate limiting. Engineering health:
+[quality dashboard](docs/quality/dashboard.md) · [release gates](docs/quality/release-gates.md) ·
+[beta-readiness register](docs/08-decisions/beta-readiness-register.md).
 
 ## Why Engineering OS?
 

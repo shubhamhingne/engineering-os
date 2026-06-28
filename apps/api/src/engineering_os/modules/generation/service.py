@@ -4,6 +4,7 @@ import logging
 import time
 from collections.abc import Iterator
 
+from ...metrics import record_ai_generation
 from ...ports.ai_provider import AIProvider, GenerationResult, Prompt
 
 log = logging.getLogger("eos.generation")
@@ -57,6 +58,10 @@ class GenerationService:
                 "tokens_out": result.tokens_out,
                 "latency_ms": latency_ms,
             },
+        )
+        record_ai_generation(
+            self._provider.name, result.model, artifact_type,
+            result.tokens_in, result.tokens_out, latency_ms,
         )
         return result
 

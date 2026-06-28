@@ -1,6 +1,10 @@
 """Application composition root."""
-from fastapi import FastAPI, Response
+import logging
+import uuid
+
+from fastapi import FastAPI, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from sqlalchemy import text
 
 from .config import settings
@@ -10,9 +14,22 @@ from .interface.http.auth import router as auth_router
 from .interface.http.compiler import router as compiler_router
 from .interface.http.explain import router as explain_router
 from .interface.http.exports import router as exports_router
+from .interface.http.middleware import DiagnosticsMiddleware
 from .interface.http.projects import router as projects_router
 from .interface.http.sync import router as sync_router
+from .metrics import UNHANDLED_ERRORS, render_latest
 from .observability import setup_logging
+
+_error_log = logging.getLogger("eos.error")
+
+
+async def unhandled_exception_handler(request: Request, exc: Exception) -> JSONResponse:
+    """Give every unhandled failure a trace id: returned to the caller and logged with the request
+    correlation id, so a production error can be found from the response alone (Sprint 3)."""
+    trace_id = uuid.uuid4().hex
+    UNHANDLED_ERRORS.inc()
+    _error_log.exception("unhandled.exception", extra={"trace_id": trace_id, "path": request.url.path})
+    return JSONResponse(status_code=500, content={"detail": "internal server error", "trace_id": trace_id})
 
 
 def create_app() -> FastAPI:
@@ -23,6 +40,7 @@ def create_app() -> FastAPI:
         init_db()
 
     app = FastAPI(title="Engineering OS API", version="1.0.0")
+    app.add_middleware(DiagnosticsMiddleware)  # request-id, access log, HTTP metrics (streaming-safe)
     app.add_middleware(
         CORSMiddleware,
         allow_origins=[o.strip() for o in settings.cors_origins.split(",")],
@@ -30,6 +48,13 @@ def create_app() -> FastAPI:
         allow_methods=["*"],
         allow_headers=["*"],
     )
+    app.add_exception_handler(Exception, unhandled_exception_handler)
+
+    @app.get("/metrics")
+    def metrics() -> Response:
+        """Prometheus exposition — HTTP throughput/latency/errors and AI volume/tokens/cost/latency."""
+        body, content_type = render_latest()
+        return Response(content=body, media_type=content_type)
 
     @app.get("/health")
     @app.get("/health/live")
