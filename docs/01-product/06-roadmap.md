@@ -1,5 +1,15 @@
 # 06 — Roadmap
 
+> **Roadmap status: 🔒 Frozen** (alongside the engineering core). The order below is the *current
+> intention*, not a commitment. It changes only on evidence — to prevent roadmap drift, another form
+> of scope creep. Re-prioritize only when:
+> - [ ] 3+ independent users report the same thing, or
+> - [ ] a measured funnel drop-off exceeds 30%, or
+> - [ ] a security / reliability issue arises, or
+> - [ ] a strategic objective is explicitly chosen.
+>
+> The next milestone is [`v0.4 — Validation`](../05-demo/validation-board.md), not an engineering one.
+
 Three horizons. Each is shippable on its own and showcases a wider slice of the stack —
 deliberately, so the portfolio value compounds with the product.
 
