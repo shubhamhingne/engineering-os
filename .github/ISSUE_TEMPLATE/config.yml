@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: How features get justified (the No-Build rule)
+    url: https://github.com/shubhamhingne/engineering-os/blob/main/docs/05-demo/validation-board.md
+    about: Engineering resumes only when a validation-board row, with evidence, justifies it.
+  - name: Compiler specification (frozen core)
+    url: https://github.com/shubhamhingne/engineering-os/blob/main/docs/02-architecture/20-compiler-specification.md
+    about: The compiler model is frozen; changes require a versioned ADR amendment.

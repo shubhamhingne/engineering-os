@@ -7,8 +7,8 @@ row, follow the link.
 |---|---|
 | **Current release** | `alpha-0.3.6` · v1.0 compiler core |
 | **Project health** | 🟢 Healthy |
-| **Architecture** | ✅ Complete — [specification](../02-architecture/20-compiler-specification.md) |
-| **Compiler** | 🔒 Frozen — [governance](../02-architecture/20-compiler-specification.md#governance) |
+| **Architecture** | 🔒 Frozen — [specification](../02-architecture/20-compiler-specification.md) |
+| **Compiler / spec / core** | 🔒 Frozen — [governance](../02-architecture/20-compiler-specification.md#governance); only implementations evolve |
 | **Backend** | 🔒 Feature-frozen at `alpha-0.3.6` · 121 tests · 92% coverage |
 | **Next engineering milestone** | `v0.4 — Provider Ecosystem` (Multi-LLM) — after the Evidence milestone |
 | **Frontend** | ⏳ Implemented, untested here (needs Node) |
